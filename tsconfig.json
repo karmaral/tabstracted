@@ -14,13 +14,21 @@
          */
         "allowJs": true,
         "checkJs": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "outDir": "dist",
+        "paths": {
+          "$features/*": ["src/main/features/*"],
+          "$lib/*": ["src/main/lib/*"],
+          "$types/*": ["src/types/*"],
+          "$types": ["src/types/index.d.ts"]
+        },
     },
     "include": [
         "src/**/*.d.ts",
         "src/**/*.ts",
         "src/**/*.js",
-        "src/**/*.svelte"
+        "src/**/*.svelte",
     ],
+    "exclude": [ "node_modules", "dist/**/*"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

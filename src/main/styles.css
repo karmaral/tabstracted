@@ -1,0 +1,41 @@
+:root {
+  --theme-font: 'Radio Canada';
+  --theme-main-bg: rgb(252, 252, 252);
+  --theme-sidebar-bg: rgb(0 0 0 / 10%);
+  --theme-sidebar-fg: rgb(0 0 0 / 70%);
+}
+*,*::before,*::after { box-sizing: border-box; }
+
+html { height: 100vh; }
+
+body {
+  height: 100%;
+  margin: 0;
+}
+#app {
+  display: flex;
+  height: 100%;
+}
+
+.ui-btn {
+  cursor: pointer !important;
+  user-select: none !important;
+}
+.btn {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--theme-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(0deg 0% 94%);
+  color: darkslategray;
+  border: 1px solid gainsboro;
+}
+.btn:hover:not(:disabled) {
+  background-color: hsl(0deg 0% 95.5%);
+}
+.btn:disabled {
+  opacity: .8;
+}

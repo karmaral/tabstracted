@@ -9,18 +9,10 @@
         "48": "/icons/get_started48.png",
         "128": "/icons/get_started128.png"
     },
-    "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["src/pages/content/index.js"]
-        }
-    ],
     "background": {
-        "service_worker": "src/pages/background/index.js"
+        "service_worker": "src/background/index.js"
     },
-    "options_page": "src/pages/options/index.html",
     "action": {
-        "default_popup": "src/pages/popup/index.html",
         "default_icon": {
             "16": "/icons/get_started16.png",
             "32": "/icons/get_started32.png",
@@ -28,5 +20,13 @@
             "128": "/icons/get_started128.png"
         }
     },
-    "permissions": ["storage"]
+    "permissions": [
+        "storage",
+        "unlimitedStorage",
+        "tabs",
+        "tabGroups",
+        "activeTab",
+        "scripting"
+    ],
+    "default_locale": "en"
 }

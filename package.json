@@ -1,10 +1,10 @@
 {
-    "name": "chrome-extension-svelte-typescript-boilerplate",
-    "version": "2.0.0",
+    "name": "tabstracted",
+    "version": "0.3.0",
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "https://github.com/nekitcorp/chrome-extension-svelte-typescript-boilerplate.git"
+        "url": "https://github.com/karmaral/tabstracted.git"
     },
     "scripts": {
         "dev": "vite build -w",
@@ -12,14 +12,25 @@
         "check": "svelte-check --tsconfig ./tsconfig.json"
     },
     "devDependencies": {
+        "@rgossiaux/svelte-headlessui": "^1.0.2",
+        "@steeze-ui/heroicons": "^2.1.0",
+        "@steeze-ui/svelte-icon": "^1.3.2",
         "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
         "@tsconfig/svelte": "^3.0.0",
         "@types/chrome": "^0.0.191",
+        "@typescript-eslint/eslint-plugin": "^5.36.1",
+        "@typescript-eslint/parser": "^5.36.1",
+        "eslint": "^8.23.0",
+        "eslint-config-standard-with-typescript": "^22.0.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-n": "^15.2.5",
+        "eslint-plugin-promise": "^6.0.1",
+        "eslint-plugin-svelte": "^2.7.0",
         "svelte": "^3.44.0",
         "svelte-check": "^2.8.0",
         "svelte-preprocess": "^4.10.7",
         "tslib": "^2.4.0",
-        "typescript": "^4.7.4",
-        "vite": "^2.9.13"
+        "typescript": "^4.8.2",
+        "vite": "^2.9.15"
     }
 }

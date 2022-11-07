@@ -3,7 +3,6 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 const srcDir = resolve(__dirname, "src");
-const pagesDir = resolve(srcDir, "pages");
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,19 +10,21 @@ export default defineConfig({
     resolve: {
         alias: {
             src: srcDir,
+            '$features': resolve(srcDir, 'main', 'features'),
+            '$lib': resolve(srcDir, 'main', 'lib'),
+            '$types': resolve(srcDir, 'types'),
         },
     },
     build: {
-        rollupOptions: {
-            input: {
-                background: resolve(pagesDir, "background", "index.ts"),
-                content: resolve(pagesDir, "content", "index.ts"),
-                options: resolve(pagesDir, "options", "index.html"),
-                popup: resolve(pagesDir, "popup", "index.html"),
-            },
-            output: {
-                entryFileNames: (chunk) => `src/pages/${chunk.name}/index.js`,
-            },
-        },
+      minify: import.meta.env.PROD,
+      rollupOptions: {
+          input: {
+              background: resolve(srcDir, 'background', 'index.ts'),
+              main: resolve(srcDir, 'main', 'index.html'),
+          },
+          output: {
+              entryFileNames: (chunk) => `src/${chunk.name}/index.js`,
+          },
+      },
     },
 });
