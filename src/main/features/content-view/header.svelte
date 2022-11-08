@@ -3,13 +3,15 @@
   import EditableTitle from '$features/ui/editable-title.svelte';
 
   $: title = $currentWorkspace.title;
-
+  function handleRename(newVal: string) {
+    console.log('update workspace name:', newVal);
+  }
 </script>
 
 <div class="content-header">
   <div class="header-row">
   <h1 class="workspace-title">
-    <EditableTitle {title} renameAction={console.log} />
+    <EditableTitle {title} renameAction={handleRename} />
   </h1>
   </div>
 </div>

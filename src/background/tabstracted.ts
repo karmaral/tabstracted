@@ -1,6 +1,5 @@
 import settings from './modules/settings';
 import registry from './modules/registry';
-import render from './modules/render';
 
 const tabstracted = {
   async init() {

@@ -115,7 +115,6 @@ export function addListeners() {
 
   chrome.tabGroups.onUpdated.addListener(onGroupUpdated);
 
-
   chrome.windows.onCreated.addListener(onWindowCreated, { windowTypes: ['normal'] });
   chrome.windows.onRemoved.addListener(onWindowRemoved, { windowTypes: ['normal'] });
 

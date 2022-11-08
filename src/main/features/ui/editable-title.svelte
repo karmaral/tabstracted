@@ -1,6 +1,17 @@
 <script lang="ts">
   import { tick } from 'svelte';
 
+  /**
+  * Triggers the edition.
+  * Useful for delegating the `on:click` function of the component to another element.
+  */
+  export function trigger() {
+    handleRename();
+  }
+  /**
+  * Wrapper function for manipulating the new value.
+  * It will be run at the end of the submit action
+  */
   export let renameAction: (newVal: string) => void;
   export let title: string;
 
