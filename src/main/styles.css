@@ -11,10 +11,15 @@ html { height: 100vh; }
 body {
   height: 100%;
   margin: 0;
+  font-family: var(--theme-font), system-ui, sans-serif;
 }
 #app {
   display: flex;
   height: 100%;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  display: inline-flex;
 }
 
 .ui-btn {

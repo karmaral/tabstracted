@@ -28,7 +28,9 @@
     align-items: center;
   }
   .workspace-title {
+    margin-block: 0;
     padding: 1em;
+    line-height: 1.5;
   }
 
 </style>
