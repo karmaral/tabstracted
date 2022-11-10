@@ -1,6 +1,6 @@
 {
     "name": "Tabstracted - Tab Manager",
-    "description": "Boilerplate for Chrome Extension Svelte Typescript project",
+    "description": "",
     "version": "0.3",
     "manifest_version": 3,
     "icons": {
@@ -27,6 +27,10 @@
         "tabGroups",
         "activeTab",
         "scripting"
+    ],
+    "host_permissions": [
+      "http://*/*",
+      "https://*/*"
     ],
     "default_locale": "en"
 }
