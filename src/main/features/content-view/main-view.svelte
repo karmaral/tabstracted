@@ -14,8 +14,10 @@
   {:else}
     <ContentHeader />
     <ContentView>
-      <div class="tab-view">
-          <TabList {tabs} {groups}/>
+      <div class="scroll-padding">
+        <div class="tab-view">
+            <TabList {tabs} {groups}/>
+        </div>
       </div>
     </ContentView>
   {/if}
@@ -28,7 +30,10 @@
     flex-grow: 1;
     height: 100%;
     overflow: hidden;
-    padding-left: 2rem;
+    padding-left: 2em;
     position: relative;
+  }
+  .scroll-padding {
+    padding-bottom: 3rem;
   }
 </style>

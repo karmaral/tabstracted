@@ -1,27 +1,18 @@
 <script lang="ts">
 
+  export let width = 'max-content';
+
 </script>
 
-<div class="scroll-container">
-  <div class="scroll-content">
-    <ul class="content-list">
-      <slot></slot>
-    </ul>
-  </div>
-</div>
+<ul class="content-list" style:width >
+  <slot></slot>
+</ul>
 
 <style>
-  .scroll-container {
-    overflow: hidden auto;
-    flex: 1 1;
-  }
-  .scroll-content {
-    padding-bottom: 3rem;
-  }
   .content-list {
     display: flex;
     flex-direction: column;
     gap: .3em;
-    width: max-content;
+    padding-inline: 0;
   }
 </style>

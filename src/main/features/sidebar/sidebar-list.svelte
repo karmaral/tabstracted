@@ -1,5 +1,6 @@
 <script>
   import { workspaceList } from '$lib/stores';
+  import { Svroller } from 'svrollbar';
   import { SidebarItem } from '.';
   let activeIds = [];
 
@@ -8,9 +9,11 @@
 </script>
 
 <div class="workspace-list">
-  {#each $workspaceList as data}
-    <SidebarItem {data} active={activeIds.includes(data.id)}/>
-  {/each}
+  <Svroller width="100%" height="100%">
+    {#each $workspaceList as data}
+      <SidebarItem {data} active={activeIds.includes(data.id)}/>
+    {/each}
+  </Svroller>
 </div>
 
 <style>
