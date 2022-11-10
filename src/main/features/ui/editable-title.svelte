@@ -38,13 +38,19 @@
 
 {#if isRenaming}
   <input type="text"
+    class="editable-title active"
     bind:this={inputElem}
     bind:value={inputValue}
     on:keydown={handleKeys}
     on:blur={handleSubmit}
   />
 {:else}
-  <span on:click={handleRename}>{title}</span>
+  <span
+    class="editable-title"
+    on:click={handleRename}
+  >
+    {title}
+</span>
 {/if}
 
 
@@ -56,5 +62,12 @@
     font-family: inherit;
     font-weight: inherit;
     line-height: inherit;
+  }
+  .editable-title {
+    --accent-color: transparent;
+    border-bottom: 1px solid var(--accent-color);
+  }
+  .active {
+    --accent-color: currentColor;
   }
 </style>
