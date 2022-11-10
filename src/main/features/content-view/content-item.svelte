@@ -1,36 +1,59 @@
 <script lang="ts">
   import type { MenuOption, ActionOption } from '$types';
-  import { Icon } from '@steeze-ui/svelte-icon';
-  import { EllipsisVertical } from '@steeze-ui/heroicons';
+  import tippy from 'tippy.js';
+  import { onMount } from 'svelte';
+  import ContentItemActions from './content-item-actions.svelte';
 
-  export let id: string;
+  export let id = '';
   export let className: string;
   export let options: MenuOption[];
   export let actions: ActionOption[];
+  /**
+   * Whether the contents are displayed horizontally or vertically.
+  */
+  export let inlineLayout = true;
+  /**
+   * Whether the options menu is placed last.
+  */
+  export let optionsButtonOrder: 'first' | 'last' = 'first';
 
+  let optionsOpen = false;
+
+  let thisElem: HTMLLIElement;
 </script>
 
-<li {id} class="content-item {className}">
-  <div class="main-slot">
-    <slot></slot>
-  </div>
+<li {id}
+  class="content-item {className}"
+  class:large={!inlineLayout}
+  bind:this={thisElem}
+>
+  {#if inlineLayout}
+    <div class="slot main">
+      <slot></slot>
+    </div>
+    <ContentItemActions
+      parentRef={thisElem}
+      {optionsOpen}
+      {optionsButtonOrder}
+      {options}
+      {actions}
+    />
+  {:else}
+    <div class="slot header">
+      <slot name="header"></slot>
+      <ContentItemActions
+        parentRef={thisElem}
+        {optionsOpen}
+        {optionsButtonOrder}
+        {options}
+        {actions}
+      />
+    </div>
 
-  <div class="content-item-actions">
-    <button
-      class="action-btn btn"
-      on:click={() => console.log(options)}
-    >
-      <Icon src={EllipsisVertical} size={'1rem'} />
-    </button>
-    {#each actions as action}
-      <button
-        class="action-btn ui-btn"
-        on:click={action.callback}
-      >
-        <Icon src={action.iconSource} size={'1rem'} />
-      </button>
-    {/each}
-  </div>
+    <div class="slot main">
+      <slot></slot>
+    </div>
+  {/if}
 </li>
 
 <style>
@@ -46,27 +69,19 @@
   .content-item:hover {
     background-color:rgb(0 0 0 / 3%);
   }
-  .main-slot {
+  .content-item.large {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .slot {
     display: flex;
     gap: var(--gap);
     align-items: center;
   }
-  .content-item-actions {
-    display: flex;
-    gap: var(--gap);
-    margin-left: auto;
-    opacity: 0;
-  }
-  .content-item:hover .content-item-actions { opacity: 1; }
+  :global(.content-item:hover > .content-item-actions),
+  :global(.content-item.large:hover > .slot.header > .content-item-actions) { opacity: 1; }
 
-  .action-btn {
-    all: unset;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: .2em;
-  }
-  .action-btn:hover {
-    background-color: rgb(0 0 0 / 5%);
+  :global(.content-item .action-btn) {
+    padding: .125rem;
   }
 </style>

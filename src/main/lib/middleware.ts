@@ -57,8 +57,15 @@ export function switchToTab(tab: TabRenderData) {
 	console.log(`hub: switching to tab ${tab.title} | ${tab.id}`);
 	chrome.runtime.sendMessage({
 		action: 'hub.tab.switch_to',
-		tab_id: tab.id
+		tab_id: tab.id,
 	});
+}
+export function collapseGroup(groupId: number, toggle: boolean) {
+  chrome.runtime.sendMessage({
+    action: 'hub.group.collapse',
+    group_id: groupId,
+    toggle,
+  });
 }
 export function saveWorkspace(workspace: Workspace) {
 	console.log(`hub: updated active workspace (saved)`, workspace);

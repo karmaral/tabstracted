@@ -1,4 +1,10 @@
-import type { IRender, TabRenderData, WorkspaceRenderData } from '$types/render';
+import type {
+  GroupRenderData,
+  IRender,
+  TabRenderData,
+  WorkspaceRenderData,
+} from '$types/render';
+import type { Tab } from '$types/models';
 import settings from './settings';
 import registry from './registry';
 
@@ -36,6 +42,7 @@ const render: IRender = {
         tabEntry.url = tab.url;
         tabEntry.favicon_url = tab.favIconUrl
         tabEntry.pinned = tab.pinned;
+        tabEntry.group_id = tab.groupId;
 
         tabList.push(tabEntry);
         continue;
@@ -47,6 +54,7 @@ const render: IRender = {
         tabEntry.url = tab.attributes.url;
         tabEntry.favicon_url = tab.attributes.favicon_url;
         tabEntry.pinned = tab.attributes.pinned;
+        tabEntry.group_id = tab.group_id;
 
         tabList.push(tabEntry);
       }
@@ -54,6 +62,47 @@ const render: IRender = {
     }
 
     return tabList;
+  },
+  groupList(groups, tabs) {
+    const groupList = [];
+
+    // const groupIds = groups.map(g => g.id);
+
+    for (const group of groups) {
+      const groupEntry: Partial<GroupRenderData> = {
+        id: group.id,
+      };
+
+      if ('title' in group) { // group is chrome.tabGroups.Group
+        groupEntry.title = group.title;
+        groupEntry.collapsed_ui = false;
+        groupEntry.collapsed_browser = group.collapsed;
+        groupEntry.color = group.color;
+
+        const groupTabs = tabs.filter((t: Tab | chrome.tabs.Tab) => {
+          if ('groupId' in t) {
+            return t.groupId === group.id;
+          }
+          else if ('attributes' in t) {
+            return t.group_id === group.id;
+          }
+        });
+        groupEntry.tabs_amount = groupTabs.length;
+
+        groupList.push(groupEntry);
+        continue;
+      }
+      else if ('attributes' in group) { // group is Group
+        groupEntry.title = group.attributes.title;
+        groupEntry.collapsed_ui = group.attributes.collapsed_ui;
+        groupEntry.collapsed_browser = group.attributes.collapsed_browser;
+        groupEntry.color = group.attributes.color;
+
+        groupList.push(groupEntry);
+      }
+    }
+
+    return groupList;
   },
   async createRenderData(windowId) {
     const workspace_list = render.workspaceList();
@@ -75,13 +124,16 @@ const render: IRender = {
 
     // Populate with current window's tabs if there's no workspace found
     const browserTabs = await chrome.tabs.query({ windowId });
+    const browserGroups = await chrome.tabGroups.query({ windowId });
+
     const tabs = render.tabList(browserTabs);
+    const groups = render.groupList(browserGroups, browserTabs);
 
     const current_workspace: WorkspaceRenderData = {
       id: null,
       title: 'Unsaved Workspace',
-      tabs: tabs,
-      groups: [],
+      tabs,
+      groups,
     };
 
     return { current_workspace, workspace_list };

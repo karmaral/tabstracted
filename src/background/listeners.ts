@@ -39,8 +39,9 @@ function onTabRemoved(tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) {
   render.updateRenderData(removeInfo.windowId);
 }
 
-function onGroupUpdated() {
-  return;
+function onGroupUpdated(group: chrome.tabGroups.TabGroup) {
+  //registry.groups.update(group);
+  render.updateRenderData(group.windowId);
 }
 
 function onWindowCreated(window: chrome.windows.Window) {
@@ -71,6 +72,11 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       break;
     case 'hub.tab.switch_to':
       chrome.tabs.update(message.tab_id, { active: true });
+      break;
+    case 'hub.group.collapse':
+      chrome.tabGroups.update(message.group_id, {
+        collapsed: message.toggle
+      });
       break;
     case 'hub.storage.request_init':
       tabstracted.init()
