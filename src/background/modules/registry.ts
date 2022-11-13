@@ -181,6 +181,13 @@ const registry: IRegistry = {
       return;
     },
     async remove(id) {
+      if (utils.isIterable(id)) {
+        for (const i of id as number[]) {
+          await registry.tabs.remove(i);
+        }
+        return;
+      }
+
       const guid = registry.query({ id });
       if (!guid) return;
 

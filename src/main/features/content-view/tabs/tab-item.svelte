@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { TabRenderData } from '$types/render';
+  import { selectedTabs } from '$lib/stores';
   import { closeTab, switchToTab } from '$lib/middleware';
   import { ContentItem } from '../.';
   import { Check, XMark } from '@steeze-ui/heroicons';
@@ -8,13 +9,14 @@
 
   export let data: TabRenderData;
 
-  $: id = `tab_${data.id}`;
+  $: ({ id } = data)
+  $: idStr = `tab_${id}`;
   $: title = data.title.length < 120
     ? data.title
     : `${data.title.substring(0, 120)}...`;
   $: src = `${data.favicon_url || ""}`;
 
-  let selected = false;
+  $: selected  = $selectedTabs.includes(id);
 
   function handleClose() {
     closeTab(data);
@@ -25,7 +27,9 @@
   }
 
   function handleSelect() {
-    selected = !selected;
+    selected
+      ? selectedTabs.update(prev => prev.filter(i => i !== id))
+      : selectedTabs.update(prev => [...prev, id])
   }
 
   const actions = [
@@ -39,7 +43,7 @@
 </script>
 
 <ContentItem
-  {id}
+  id={idStr}
   className="tab-entry {selected ? 'selected' : ''}"
   {options}
   {actions}
@@ -60,8 +64,9 @@
   :global(li.tab-entry) {
     position: relative;
   }
-  :global(li.tab-entry.selected) {
-    border-color: blue;
+  :global(li.tab-entry.selected, li.tab-entry.selected:hover) {
+    border-color: rgb(183 183 255);
+    background: rgb(235 238 255);
   }
   .tab-icon {
     width: 1em;

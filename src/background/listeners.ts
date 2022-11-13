@@ -69,6 +69,9 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       registry.tabs.remove(message.tab_id);
       break;
     case 'hub.tab.close_batch':
+      chrome.tabs.remove(message.tab_ids)
+        .then(() => registry.tabs.remove(message.tab_ids))
+        .then(() => sendResponse(true));
       break;
     case 'hub.tab.switch_to':
       chrome.tabs.update(message.tab_id, { active: true });

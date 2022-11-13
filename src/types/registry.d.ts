@@ -6,7 +6,7 @@ export interface RegistryQueryOptions {
   includeAll?: boolean;
   mapTo?: string;
   [key?: string]: unknown
-};
+}
 export type RegistryTarget = 'current' | 'previous' | 'deleted';
 
 export interface IRegistry {
@@ -61,7 +61,7 @@ export interface IRegistry {
     /**
      * Moves the tab from the `current` registry into the `removed` one.
      */
-    remove(id: number): Promise<void | number>
+    remove(id: number | number[]): Promise<void | number>
     /**
      * Writes the currently cached tab registry to the browser storage.
      */
@@ -70,4 +70,4 @@ export interface IRegistry {
   listeners: {
     tabUpdated(id: number, tab: chrome.tabs.Tab): Promise<void>;
   };
-};
+}

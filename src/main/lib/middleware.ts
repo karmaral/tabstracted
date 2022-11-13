@@ -48,8 +48,8 @@ export async function closeTab(tab: TabRenderData): Promise<void> {
 export async function batchCloseTabs(ids: number[]): Promise<void> {
 	console.log(`hub: batch closing ${ids.length} tabs`);
 	await chrome.runtime.sendMessage({
-		action: 'hub.tab.batchClose',
-		tabIds: ids
+		action: 'hub.tab.close_batch',
+		tab_ids: ids
 	});
 	console.log(`batchCloseTabs FINISHED`);
 }

@@ -20,10 +20,12 @@ export const currentWorkspace = derived<Writable<RenderData>, WorkspaceRenderDat
   ($renderData) => $renderData.current_workspace);
 
 
-export let storageLoaded = derived<Writable<RenderData>, boolean>(
+export const storageLoaded = derived<Writable<RenderData>, boolean>(
   renderData,
   ($renderData) => {
     console.log({ $renderData });
     return Boolean($renderData.current_workspace.title);
   }
 );
+
+export const selectedTabs = writable<number[]>([]);
