@@ -4,7 +4,8 @@ import { get } from 'svelte/store';
 import {
   currentWindowId as $currentWindowId,
   renderData as $renderData,
-  waitingMode as $waitingMode
+  waitingMode as $waitingMode,
+  storageLoaded as $storageLoaded,
 } from '$lib/stores';
 
 // abstraction interface for dealing with background.js
@@ -34,6 +35,14 @@ export async function init() {
 
   await chrome.runtime.sendMessage({
     action: 'hub.storage.request_init',
+    window_id: id,
+  });
+}
+export async function refresh() {
+  if (!get($storageLoaded)) return;
+  const id = get($currentWindowId);
+  await chrome.runtime.sendMessage({
+    action: 'hub.render.request_update',
     window_id: id,
   });
 }

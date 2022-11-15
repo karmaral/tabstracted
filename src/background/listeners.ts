@@ -85,6 +85,9 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       tabstracted.init()
         .then(() => render.updateRenderData(message.window_id));
       break;
+    case 'hub.render.request_update':
+        render.updateRenderData(message.window_id);
+      break;
     case 'hub.workspace.save':
       break;
     case 'hub.workspace.save_new':
