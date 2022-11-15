@@ -1,8 +1,43 @@
-import type { WaitingModeEnum } from '$types';
+import type { WaitingModeEnum, IdListStore } from '$types';
 import type { RenderData, WorkspaceListRenderData, WorkspaceRenderData } from '$types/render';
 import { writable, derived, type Writable } from 'svelte/store';
 
-// placeholder
+function createIdList<T>(initial: T[]): IdListStore<T> {
+  const store = writable<T[]>(initial);
+  const { subscribe, set, update } = store;
+  const storeObj = {
+    subscribe,
+    add: (data: T | T[]) => {
+      Array.isArray(data)
+        ? update(prev => [...prev, ...data])
+        : update(prev => [...prev, data]);
+    },
+    remove: (data: T | T[]) => {
+      Array.isArray(data)
+        ? update(prev => prev.filter(d => !data.includes(d)))
+        : update(prev => prev.filter(d => d !== data));
+    },
+    toggle: (data: T | T[]) => {
+      update(prev => {
+        const result = [...prev];
+        if (Array.isArray(data)) {
+          data.forEach(id => {
+            result.includes(id)
+              ? result.splice(result.indexOf(id), 1)
+              : result.push(id);
+          });
+        } else {
+          prev.includes(data)
+            ? result.splice(result.indexOf(data), 1)
+            : result.push(data)
+        }
+        return result;
+      });
+    },
+    clear: ()  => set([])
+  };
+  return storeObj;
+}
 
 export const currentWindowId = writable<number>();
 export const waitingMode = writable<WaitingModeEnum>();
@@ -28,4 +63,4 @@ export const storageLoaded = derived<Writable<RenderData>, boolean>(
   }
 );
 
-export const selectedTabs = writable<number[]>([]);
+export const selectedTabs = createIdList<number>([]);

@@ -21,6 +21,9 @@
 
   function handleClose() {
     closeTab(data);
+    if (selected) {
+      selectedTabs.remove(id);
+    }
   }
 
   function handleSwitchTo() {
@@ -28,9 +31,7 @@
   }
 
   function handleSelect() {
-    selected
-      ? selectedTabs.update(prev => prev.filter(i => i !== id))
-      : selectedTabs.update(prev => [...prev, id])
+    selectedTabs.toggle(id);
   }
 
   const actions = [
