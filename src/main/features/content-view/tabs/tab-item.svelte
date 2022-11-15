@@ -3,9 +3,10 @@
   import { selectedTabs } from '$lib/stores';
   import { closeTab, switchToTab } from '$lib/middleware';
   import { ContentItem } from '../.';
-  import { Check, XMark } from '@steeze-ui/heroicons';
+  import { Checkbox } from '$features/ui'
+
+  import { XMark } from '@steeze-ui/heroicons';
   import options from './tab-item-options';
-  import { Icon } from '@steeze-ui/svelte-icon';
 
   export let data: TabRenderData;
 
@@ -48,12 +49,7 @@
   {options}
   {actions}
 >
-  <div class="select-box">
-    {#if selected}
-      <Icon src={Check} size={'1rem'} stroke-width={2} />
-    {/if}
-    <div class="pointer-target" on:click={handleSelect}></div>
-  </div>
+  <Checkbox {selected} onSelect={handleSelect} draggable={true} />
   <img class="tab-icon" {src} alt="">
   <div class="tab-title tab-switch-to ui-btn" on:click={handleSwitchTo}>
     {title}
@@ -64,28 +60,16 @@
   :global(li.tab-entry) {
     position: relative;
   }
-  :global(li.tab-entry.selected, li.tab-entry.selected:hover) {
+  :global(li.tab-entry.selected) {
     border-color: rgb(183 183 255);
     background: rgb(235 238 255);
+  }
+  :global(li.tab-entry.selected:hover) {
+    background: rgb(231 234 253);
   }
   .tab-icon {
     width: 1em;
     height: 1em;
     user-select: none;
   }
-	.select-box {
-		width: 1rem;
-		height: 1rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid rgb(0 0 0 / 33%);
-	}
-	.select-box .pointer-target {
-		cursor: pointer;
-		width: calc(1rem + 2px);
-		position: absolute;
-    top: 0;
-    bottom: 0;
-	}
 </style>
