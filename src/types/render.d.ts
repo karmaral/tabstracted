@@ -19,6 +19,11 @@ export interface GroupRenderData {
   tabs_amount: number;
 }
 
+export interface WindowRenderData {
+  id: number;
+  title: string;
+}
+
 export interface WorkspaceListRenderData {
   id: string | null;
   title: string;

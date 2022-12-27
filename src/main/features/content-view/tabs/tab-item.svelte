@@ -1,6 +1,9 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { TabRenderData } from '$types/render';
+  import type { MenuOption } from '$types';
   import { selectedTabs, allWindows, menuState } from '$lib/stores';
+  import { closeTab, switchToTab, moveToWindow } from '$lib/middleware';
   import { ContentItem } from '../.';
   import { Checkbox } from '$features/ui'
 
@@ -18,6 +21,14 @@
 
   $: selected  = $selectedTabs.includes(id);
 
+  let hydratedOptions: MenuOption[] = [];
+
+  const optionCallbacks = {
+    'close': handleClose,
+    'move_to_window': (windowId: number) => handleMoveToWindow(windowId),
+    'new_window': () => handleMoveToWindow(-1),
+  }
+
   function handleClose() {
     closeTab(data);
     if (selected) {
@@ -33,25 +44,67 @@
     selectedTabs.toggle(id);
   }
 
+  function handleMoveToWindow(windowId: number) {
+    moveToWindow(id, windowId);
+    $menuState.closeAction();
+  }
+
+  function hydrateOptions() {
+    const hydratedOptions = options.map((obj) => ({...obj }));
+    hydratedOptions.forEach((opt, i) => {
+      if (opt?.children_source === 'window') {
+        console.log(`hydrating ${opt.id}... (${id})`);
+        opt.children = $allWindows.map((w) => ({
+          type: 'entry',
+          id: w.id.toString(),
+          label: w.title,
+          callback: () => optionCallbacks[opt.id](w.id),
+        }));
+        const initial = options[i].children.map((iOpt) => {
+          if (optionCallbacks[iOpt?.id]) {
+            return {...iOpt, callback: () => optionCallbacks[iOpt.id]() }
+          }
+          return {...iOpt };
+        });
+        opt.children.push(...initial);
+      }
+
+      if (opt.children?.length && opt.children[0]?.type === 'separator') {
+        opt.children.shift();
+      }
+
+      if (!opt.children?.length) {
+        opt.callback = optionCallbacks[opt.id];
+      }
+    });
+    return hydratedOptions;
+  }
+
   const actions = [
     {
+      id: 'close',
       label: 'Close',
       callback: handleClose,
       iconSource: XMark,
     }
   ];
 
+  onMount(() => {
+    hydratedOptions = hydrateOptions();
+    });
 </script>
 
 <ContentItem
   id={idStr}
   className="tab-entry {selected ? 'selected' : ''}"
-  {options}
+  options={hydratedOptions}
   {actions}
 >
   <Checkbox {selected} onSelect={handleSelect} draggable={true} />
   <img class="tab-icon" {src} alt="">
-  <div class="tab-title tab-switch-to ui-btn" on:click={handleSwitchTo}>
+  <div class="tab-title tab-switch-to ui-btn"
+    on:click={handleSwitchTo}
+  >
     {title}
   </div>
 </ContentItem>

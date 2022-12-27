@@ -1,5 +1,6 @@
 import registry from './modules/registry';
 import render from './modules/render';
+import tabs from './modules/tabs';
 import * as utils from './modules/utils';
 import tabstracted from './tabstracted';
 
@@ -75,6 +76,9 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       break;
     case 'hub.tab.switch_to':
       chrome.tabs.update(message.tab_id, { active: true });
+      break;
+    case 'hub.tab.move_to_window':
+      tabs.moveToWindow(message.tab_id, message.window_id);
       break;
     case 'hub.group.collapse':
       chrome.tabGroups.update(message.group_id, {

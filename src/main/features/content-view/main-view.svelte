@@ -4,8 +4,7 @@
   import { LoadingWidget } from '$features/ui';
   import TabList from './tabs';
 
-  $: tabs = $currentWorkspace.tabs;
-  $: groups = $currentWorkspace.groups;
+  $: ({ tabs, groups } = $currentWorkspace);
 </script>
 
 <main>
@@ -16,7 +15,7 @@
     <ContentView>
       <div class="scroll-padding">
         <div class="tab-view">
-            <TabList {tabs} {groups}/>
+            <TabList {tabs} {groups} />
         </div>
       </div>
     </ContentView>

@@ -3,6 +3,7 @@ import type { RenderData, TabRenderData } from '$types/render';
 import { get } from 'svelte/store';
 import {
   currentWindowId as $currentWindowId,
+  allWindows as $allWindows,
   renderData as $renderData,
   waitingMode as $waitingMode,
   storageLoaded as $storageLoaded,
@@ -32,6 +33,22 @@ export async function init() {
   const window = await chrome.windows.getCurrent();
   const { id } = window;
   $currentWindowId.set(id);
+
+  const allWindows = await chrome.windows.getAll({
+    windowTypes: ['normal'],
+    populate: true,
+  });
+  $allWindows.set(allWindows.map((w) => {
+    const labelTab = w.tabs.filter((t) => t.active)[0] || w.tabs[w.tabs.length - 1];
+    const maxChars = 48;
+    const label = labelTab.title.length < maxChars
+      ? labelTab.title
+      : `${labelTab.title.substring(0, maxChars)}...`;
+    return {
+      id: w.id,
+      title: label,
+    };
+  }));
 
   await chrome.runtime.sendMessage({
     action: 'hub.storage.request_init',
@@ -67,6 +84,13 @@ export function switchToTab(tab: TabRenderData) {
 	chrome.runtime.sendMessage({
 		action: 'hub.tab.switch_to',
 		tab_id: tab.id,
+	});
+}
+export function moveToWindow(tabId: number, windowId: number) {
+	chrome.runtime.sendMessage({
+		action: 'hub.tab.move_to_window',
+		tab_id: tabId,
+    window_id: windowId,
 	});
 }
 export function collapseGroup(groupId: number, toggle: boolean) {

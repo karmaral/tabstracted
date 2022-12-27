@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MenuOption, ActionOption } from '$types';
-  import { MenuTrigger } from '$features/ui';
+  import { MenuTrigger } from '$features/ui/menu';
   import { Icon } from '@steeze-ui/svelte-icon';
   import { EllipsisVertical } from '@steeze-ui/heroicons';
 
