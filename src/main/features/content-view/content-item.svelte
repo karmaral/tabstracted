@@ -1,7 +1,6 @@
 <script lang="ts">
+  import { menuState } from '$lib/stores';
   import type { MenuOption, ActionOption } from '$types';
-  import tippy from 'tippy.js';
-  import { onMount } from 'svelte';
   import ContentItemActions from './content-item-actions.svelte';
 
   export let id = '';
@@ -13,27 +12,32 @@
   */
   export let inlineLayout = true;
   /**
-   * Whether the options menu is placed last.
+   * Order for placing the options menu button.
   */
   export let optionsButtonOrder: 'first' | 'last' = 'first';
 
   let optionsOpen = false;
 
   let thisElem: HTMLLIElement;
+
+  $: if ($menuState) {
+    if (thisElem === $menuState?.owner?.parentElement.parentElement) {
+      optionsOpen = $menuState.open;
+    }
+  }
 </script>
 
 <li {id}
-  class="content-item {className}"
-  class:large={!inlineLayout}
-  bind:this={thisElem}
+class="content-item {className}"
+class:large={!inlineLayout}
+class:options-open={optionsOpen}
+bind:this={thisElem}
 >
   {#if inlineLayout}
     <div class="slot main">
       <slot></slot>
     </div>
     <ContentItemActions
-      parentRef={thisElem}
-      {optionsOpen}
       {optionsButtonOrder}
       {options}
       {actions}
@@ -42,8 +46,6 @@
     <div class="slot header">
       <slot name="header"></slot>
       <ContentItemActions
-        parentRef={thisElem}
-        {optionsOpen}
         {optionsButtonOrder}
         {options}
         {actions}

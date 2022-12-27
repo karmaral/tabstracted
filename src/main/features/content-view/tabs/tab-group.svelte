@@ -16,6 +16,7 @@
 
   const actions = [
     {
+      id: 'expand_collapse',
       label: 'Expand/Collapse',
       callback: handleCollapse,
       iconSource: ArrowsPointingIn,

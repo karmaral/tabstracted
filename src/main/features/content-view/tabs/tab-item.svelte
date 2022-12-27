@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { TabRenderData } from '$types/render';
-  import { selectedTabs } from '$lib/stores';
-  import { closeTab, switchToTab } from '$lib/middleware';
+  import { selectedTabs, allWindows, menuState } from '$lib/stores';
   import { ContentItem } from '../.';
   import { Checkbox } from '$features/ui'
 

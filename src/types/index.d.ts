@@ -6,12 +6,29 @@ export type IStorage = {
 };
 
 export interface ActionOption {
+  id: string;
   label: string;
-  callback?: (unknown) => unknown;
+  callback?: (unknown?) => unknown;
   iconSource?: IconSource
 }
+
+type MenuOptionType = 'entry' | 'separator';
 export interface MenuOption extends ActionOption {
-  children?: MenuOption[];
+  type: MenuOptionType;
+  id?: { type: 'entry' } extends { type: MenuOptionType } ? string : never;
+  label?: { type: 'entry' } extends { type: MenuOptionType } ? string : never;
+  callback?: { type: 'entry' } extends { type: MenuOptionType } ? (unknown?) => unknown : never;
+  children?: { type: 'entry' } extends { type: MenuOptionType } ? MenuOption[] : never;
+  children_source?: 'group' | 'window' | 'workspace';
+  iconSource?: { type: 'entry' } extends { type: MenuOptionType } ? IconSource : never;
+}
+
+export interface MenuState {
+  owner: HTMLElement;
+  lastOwner: { elem: HTMLElement, closeAction : () => void };
+  open: boolean;
+  closeAction: () => void;
+  entries: MenuOption[];
 }
 
 export type WaitingModeEnum = 'waiting' | 'loading' | null;

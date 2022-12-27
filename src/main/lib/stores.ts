@@ -1,4 +1,4 @@
-import type { WaitingModeEnum, IdListStore } from '$types';
+import type { WaitingModeEnum, IdListStore, MenuState } from '$types';
 import type { RenderData, WorkspaceListRenderData, WorkspaceRenderData } from '$types/render';
 import { writable, derived, type Writable } from 'svelte/store';
 
@@ -64,3 +64,5 @@ export const storageLoaded = derived<Writable<RenderData>, boolean>(
 );
 
 export const selectedTabs = createIdList<number>([]);
+
+export const menuState = writable<MenuState>();
