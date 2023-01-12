@@ -8,6 +8,7 @@ export interface TabRenderData {
   favicon_url: string;
   pinned: boolean;
   group_id: number;
+  suspended: boolean;
 }
 
 export interface GroupRenderData {

@@ -28,5 +28,6 @@ export interface TabAttributes {
   url?: string | undefined;
   favicon_url?: string | undefined;
   pinned?: boolean;
+  suspended?: boolean;
   [key: string]: unknown;
 }

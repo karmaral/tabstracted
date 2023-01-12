@@ -2,11 +2,6 @@ import type { MenuOption } from '$types';
 
 const options: MenuOption[] = [
   {
-    id: 'close',
-    label: 'Close',
-    type: 'entry',
-  },
-  {
     id: 'add_to_group',
     label: 'Add to group',
     children: [
@@ -32,6 +27,16 @@ const options: MenuOption[] = [
       }
     ],
     children_source: 'window',
+    type: 'entry',
+  },
+  {
+    id: 'close',
+    label: 'Close',
+    type: 'entry',
+  },
+  {
+    id: 'suspend',
+    label: 'Suspend',
     type: 'entry',
   },
 ];

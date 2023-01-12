@@ -3,7 +3,7 @@
   import type { TabRenderData } from '$types/render';
   import type { MenuOption } from '$types';
   import { selectedTabs, allWindows, menuState } from '$lib/stores';
-  import { closeTab, switchToTab, moveToWindow } from '$lib/middleware';
+  import { closeTab, switchToTab, moveToWindow, suspendTab } from '$lib/middleware';
   import { ContentItem } from '../.';
   import { Checkbox } from '$features/ui'
 
@@ -12,7 +12,7 @@
 
   export let data: TabRenderData;
 
-  $: ({ id } = data)
+  $: ({ id, suspended } = data)
   $: idStr = `tab_${id}`;
   $: title = data.title.length < 120
     ? data.title
@@ -21,12 +21,16 @@
 
   $: selected  = $selectedTabs.includes(id);
 
+  $: tabStates = { selected, suspended };
+  $: classes = Object.keys(tabStates).filter(c => tabStates[c]).join(' ');
+
   let hydratedOptions: MenuOption[] = [];
 
   const optionCallbacks = {
-    'close': handleClose,
     'move_to_window': (windowId: number) => handleMoveToWindow(windowId),
     'new_window': () => handleMoveToWindow(-1),
+    'close': handleClose,
+    'suspend': handleSuspend,
   }
 
   function handleClose() {
@@ -34,6 +38,12 @@
     if (selected) {
       selectedTabs.remove(id);
     }
+    $menuState.closeAction();
+  }
+
+  function handleSuspend() {
+    suspendTab(id);
+    $menuState.closeAction();
   }
 
   function handleSwitchTo() {
@@ -76,6 +86,12 @@
       if (!opt.children?.length) {
         opt.callback = optionCallbacks[opt.id];
       }
+
+      if (opt.id === 'suspend') {
+        console.log(tabStates);
+        if (tabStates.suspended)
+          opt.disabled = true;
+      }
     });
     return hydratedOptions;
   }
@@ -96,7 +112,7 @@
 
 <ContentItem
   id={idStr}
-  className="tab-entry {selected ? 'selected' : ''}"
+  className="tab-entry {classes}"
   options={hydratedOptions}
   {actions}
 >
@@ -119,6 +135,9 @@
   }
   :global(li.tab-entry.selected:hover) {
     background: rgb(231 234 253);
+  }
+  :global(li.tab-entry.suspended) .tab-title {
+    opacity: .7;
   }
   .tab-icon {
     width: 1em;

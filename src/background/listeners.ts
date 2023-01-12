@@ -13,10 +13,10 @@ async function onActionClicked() {
 }
 
 async function onTabUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) {
-  if (changeInfo.status === 'complete' || changeInfo.groupId) {
-    registry.listeners.tabUpdated(tabId, tab);
-    render.updateRenderData(tab.windowId);
-  }
+  if (changeInfo.status === 'loading') return;
+
+  registry.listeners.tabUpdated(tabId, tab);
+  render.updateRenderData(tab.windowId);
   // TODO: the skeleton loading could be called from here
 }
 
@@ -79,6 +79,9 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       break;
     case 'hub.tab.move_to_window':
       tabs.moveToWindow(message.tab_id, message.window_id);
+      break;
+    case 'hub.tab.suspend':
+      chrome.tabs.discard(message.tab_id);
       break;
     case 'hub.group.collapse':
       chrome.tabGroups.update(message.group_id, {

@@ -25,7 +25,7 @@ const render: IRender = {
   tabList(tabs) {
     const currentSettings = settings.cache;
     const hidePinned: boolean = currentSettings.display.hide_pinned_tabs.value;
-    const tabList = [];
+    const tabList = [] as TabRenderData[];
 
     for (const tab of tabs) {
       const tabEntry: Partial<TabRenderData> = {
@@ -43,9 +43,7 @@ const render: IRender = {
         tabEntry.favicon_url = tab.favIconUrl
         tabEntry.pinned = tab.pinned;
         tabEntry.group_id = tab.groupId;
-
-        tabList.push(tabEntry);
-        continue;
+        tabEntry.suspended = tab.discarded;
       }
       else if ('attributes' in tab) { // tab is Tab
         if (hidePinned && tab.attributes.pinned) continue;
@@ -55,10 +53,10 @@ const render: IRender = {
         tabEntry.favicon_url = tab.attributes.favicon_url;
         tabEntry.pinned = tab.attributes.pinned;
         tabEntry.group_id = tab.group_id;
-
-        tabList.push(tabEntry);
+        tabEntry.suspended = tab.attributes.suspended;
       }
 
+      tabList.push(tabEntry as TabRenderData);
     }
 
     return tabList;

@@ -93,6 +93,12 @@ export function moveToWindow(tabId: number, windowId: number) {
     window_id: windowId,
 	});
 }
+export function suspendTab(tabId: number) {
+  chrome.runtime.sendMessage({
+    action: 'hub.tab.suspend',
+    tab_id: tabId,
+  });
+}
 export function collapseGroup(groupId: number, toggle: boolean) {
   chrome.runtime.sendMessage({
     action: 'hub.group.collapse',
