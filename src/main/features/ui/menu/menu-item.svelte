@@ -7,6 +7,7 @@
   export let label: string;
   export let children: MenuOption[] = [];
   export let callback: () => void;
+  export let disabled = false;
 
   let active = false;
 
@@ -25,6 +26,7 @@
 {#if type === 'entry'}
   <div class="menu-item ui-btn"
     class:active
+    class:disabled
     on:focus={handleFocus}
     on:blur={handleBlur}
     on:mouseover={handleFocus}
@@ -70,8 +72,9 @@
   .menu-item.active {
     background-color: rgb(0 0 0 / 5%);
   }
-  .menu-item.active > .menu-container.sub-menu {
-    display: flex;
+  .menu-item.disabled {
+    opacity: .5;
+    pointer-events: none;
   }
   .has-children-icon {
     margin-left: auto;

@@ -52,6 +52,7 @@
         label={item?.label}
         callback={item?.callback}
         children={item?.children}
+        disabled={item?.disabled}
       />
     {/each}
   </div>
