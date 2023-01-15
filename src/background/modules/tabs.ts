@@ -19,6 +19,16 @@ const tabs: ITabs = {
       windowId: winId,
       index: -1,
     });
+  },
+  async suspend(tabIds) {
+    const ids = Array.isArray(tabIds) ? tabIds : [tabIds];
+    for (const id of ids) {
+      try {
+        await chrome.tabs.discard(id);
+      } catch (e) {
+        console.log(e);
+      }
+    }
   }
 };
 

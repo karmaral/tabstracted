@@ -99,6 +99,12 @@ export function suspendTab(tabId: number) {
     tab_id: tabId,
   });
 }
+export async function batchSuspendTabs(ids: number[]): Promise<void> {
+  await chrome.runtime.sendMessage({
+    action: 'hub.tab.suspend_batch',
+    tab_ids: ids,
+  });
+}
 export function collapseGroup(groupId: number, toggle: boolean) {
   chrome.runtime.sendMessage({
     action: 'hub.group.collapse',

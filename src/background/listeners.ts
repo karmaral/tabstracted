@@ -81,7 +81,11 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       tabs.moveToWindow(message.tab_id, message.window_id);
       break;
     case 'hub.tab.suspend':
-      chrome.tabs.discard(message.tab_id);
+      tabs.suspend(message.tab_id)
+      break;
+    case 'hub.tab.suspend_batch':
+      tabs.suspend(message.tab_ids)
+        .then(() => sendResponse(true));
       break;
     case 'hub.group.collapse':
       chrome.tabGroups.update(message.group_id, {
