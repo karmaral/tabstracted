@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { MenuOption, MenuOptionType } from "$types";
+  import { createPopperActions } from 'svelte-popperjs';
   import { Icon } from '@steeze-ui/svelte-icon';
   import { ChevronRight } from '@steeze-ui/heroicons';
+  import type { MenuOption, MenuOptionType } from "$types";
 
   export let type: MenuOptionType;
   export let label: string;
@@ -10,21 +11,35 @@
   export let disabled = false;
 
   let active = false;
+  let itemElement: HTMLButtonElement;
+  let subMenuContainer: HTMLDivElement;
+  $: hasChildren = Boolean(children?.length);
+
+  const [popperRef, popperContent] = createPopperActions({
+    placement: 'right-start',
+    strategy: 'fixed',
+  });
 
   function handleCallback() {
     callback();
     active = false;
   }
+
   function handleFocus() {
+    if (hasChildren && !active) {
+      popperRef(itemElement)
+    }
     active = true;
   }
+
   function handleBlur() {
     active = false;
   }
+
 </script>
 
 {#if type === 'entry'}
-  <div class="menu-item ui-btn"
+  <button class="menu-item ui-btn"
     class:active
     class:disabled
     on:focus={handleFocus}
@@ -32,23 +47,29 @@
     on:mouseover={handleFocus}
     on:mouseleave={handleBlur}
     on:click={handleCallback}
+    bind:this={itemElement}
   >
     {label}
-    {#if children?.length}
+    {#if hasChildren}
       <div class="has-children-icon">
         <Icon src={ChevronRight} size={'1em'} />
       </div>
-      <div class="menu-container sub-menu">
-        {#each children as ch}
-          <svelte:self
-            type={ch.type}
-            label={ch.label}
-            callback={ch.callback}
-          />
-        {/each}
-      </div>
+      {#if active}
+        <div class="menu-container sub-menu"
+          use:popperContent
+          bind:this={subMenuContainer}
+        >
+          {#each children as ch}
+            <svelte:self
+              type={ch.type}
+              label={ch.label}
+              callback={ch.callback}
+            />
+          {/each}
+        </div>
+      {/if}
     {/if}
-  </div>
+  </button>
 {:else}
   <div class="menu-item-separator"></div>
 {/if}
@@ -56,7 +77,6 @@
 <style>
   .menu-container.sub-menu {
     left: 100%;
-    display: none;
     width: max-content;
   }
   .menu-item-separator {
@@ -64,6 +84,7 @@
     margin: .3rem;
   }
   .menu-item {
+    all: unset;
     display: flex;
     align-items: center;
     padding: .5rem;
@@ -77,6 +98,7 @@
     pointer-events: none;
   }
   .has-children-icon {
+    pointer-events: none;
     margin-left: auto;
   }
 </style>
