@@ -21,6 +21,7 @@ export interface MenuOption extends ActionOption {
   children?: { type: 'entry' } extends { type: MenuOptionType } ? MenuOption[] : never;
   children_source?: 'group' | 'window' | 'workspace';
   iconSource?: { type: 'entry' } extends { type: MenuOptionType } ? IconSource : never;
+  disabled?: boolean;
 }
 
 export interface MenuState {
