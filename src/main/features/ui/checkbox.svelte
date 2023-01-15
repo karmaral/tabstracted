@@ -11,7 +11,10 @@ import { Check } from '@steeze-ui/heroicons';
   export let onSelect: () => void;
 </script>
 
-<div class="select-box" class:rapid={draggable} >
+<div class="select-box"
+  class:rapid={draggable}
+  class:selected
+>
   {#if selected}
     <Icon src={Check} size={'1rem'} stroke-width={3} />
   {/if}
@@ -20,7 +23,7 @@ import { Check } from '@steeze-ui/heroicons';
 
 <style>
 	.select-box {
-    --size: 1rem;
+    --size: 1.2rem;
 		width: var(--size);
 		height: var(--size);
 		display: flex;
@@ -28,6 +31,11 @@ import { Check } from '@steeze-ui/heroicons';
 		justify-content: center;
 		border: 1px solid rgb(0 0 0 / 33%);
 	}
+  .select-box.selected {
+    color: white;
+    border-color: rgb(0 168 255);
+    background-color: rgb(0 168 255);
+  }
 	.pointer-target {
 		cursor: pointer;
 		width: calc(var(--size) + 2px);

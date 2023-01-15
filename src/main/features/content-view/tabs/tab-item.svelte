@@ -140,8 +140,8 @@
     opacity: .7;
   }
   .tab-icon {
-    width: 1em;
-    height: 1em;
+    width: 1rem;
+    height: 1rem;
     user-select: none;
   }
 </style>
