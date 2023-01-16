@@ -5,7 +5,7 @@
   import { menuState } from '$lib/stores';
   import { tick } from 'svelte';
 
-  export let entries: MenuOption[];
+  export let entries: MenuOption[] = [];
   export let icon: IconSource;
   export let iconSize = '1em'
   export let buttonClass = '';
@@ -48,6 +48,7 @@
         lastOwner: (!prev?.lastOwner?.elem)
           ? { elem: menuButton, closeAction: handleClose }
           : { elem: prev.owner, closeAction: prev.closeAction },
+        ref: prev.ref,
       };
       return newState;
     });

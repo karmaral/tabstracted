@@ -1,4 +1,9 @@
-import type { WaitingModeEnum, IdListStore, MenuState } from '$types';
+import type {
+  WaitingModeEnum,
+  IdListStore,
+  MenuState,
+  ContentView,
+} from '$types';
 import type {
   RenderData,
   WindowRenderData,
@@ -13,9 +18,11 @@ function createIdList<T>(initial: T[]): IdListStore<T> {
   const storeObj = {
     subscribe,
     add: (data: T | T[]) => {
-      Array.isArray(data)
-        ? update(prev => [...prev, ...data])
-        : update(prev => [...prev, data]);
+      const addData = Array.isArray(data) ? data : [data];
+      update(prev => {
+        const set = new Set([...prev, ...addData]);
+        return Array.from(set);
+      });
     },
     remove: (data: T | T[]) => {
       Array.isArray(data)
@@ -24,13 +31,14 @@ function createIdList<T>(initial: T[]): IdListStore<T> {
     },
     toggle: (data: T | T[]) => {
       update(prev => {
-        const result = [...prev];
+        let result = [...prev];
         if (Array.isArray(data)) {
-          data.forEach(id => {
-            result.includes(id)
-              ? result.splice(result.indexOf(id), 1)
-              : result.push(id);
-          });
+          if (result.some(id => data.includes(id))) {
+            result = result.filter(id => !data.includes(id));
+          } else {
+            const set = new Set(result.concat(data));
+            result = Array.from(set);
+          }
         } else {
           prev.includes(data)
             ? result.splice(result.indexOf(data), 1)
@@ -69,6 +77,7 @@ export const storageLoaded = derived<Writable<RenderData>, boolean>(
 
 export const selectedTabs = createIdList<number>([]);
 
+export const currentView = writable<ContentView>('tab');
 export const allWindows = writable<WindowRenderData[]>([]);
 
 export const menuState = writable<MenuState>();

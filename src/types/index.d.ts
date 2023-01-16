@@ -30,10 +30,12 @@ export interface MenuState {
   open: boolean;
   closeAction: () => void;
   entries: MenuOption[];
+  ref: HTMLDivElement;
 }
 
 export type WaitingModeEnum = 'waiting' | 'loading' | null;
 
+export type ContentView = 'tab';
 
 export interface Tabstracted {
   init(): Promise<void>;
