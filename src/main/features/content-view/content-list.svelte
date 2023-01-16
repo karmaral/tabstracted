@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  export let width = 'max-content';
+  export let width = '';
 
 </script>
 
@@ -14,5 +14,6 @@
     flex-direction: column;
     gap: .3em;
     padding-inline: 0;
+    max-width: var(--layout-max-item-width);
   }
 </style>

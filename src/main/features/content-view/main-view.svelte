@@ -33,6 +33,6 @@
     position: relative;
   }
   .scroll-padding {
-    padding-bottom: 3rem;
+    padding-bottom: calc(var(--layout-action-bar-height) + 1rem);
   }
 </style>

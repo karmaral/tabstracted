@@ -3,6 +3,8 @@
   --theme-main-bg: rgb(252, 252, 252);
   --theme-sidebar-bg: rgb(0 0 0 / 10%);
   --theme-sidebar-fg: rgb(0 0 0 / 70%);
+  --layout-max-item-width: 55rem;
+  --layout-action-bar-height: 3.1rem;
 }
 *,*::before,*::after { box-sizing: border-box; }
 

@@ -5,5 +5,5 @@ import MenuTrigger from './menu-trigger.svelte';
 export {
   MenuHandler,
   MenuItem,
-  MenuList,
+  MenuTrigger,
 };

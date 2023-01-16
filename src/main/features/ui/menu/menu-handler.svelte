@@ -30,14 +30,24 @@
     }
   }
 
-  document.addEventListener('click', (e: Event) => {
-    console.log(menuContainer, e.target);
+  $: if (show) {
+    menuState.update((prev) => ({
+      ...prev,
+      ref: menuContainer,
+    }));
+  }
+
+
+  function closeHandler(e: MouseEvent) {
     if (!menuContainer) return;
-    if (!menuContainer.contains(e.target as Node)
-      && !$menuState.owner.contains(e.target as Node)) {
+    const tgt = e.target as Node;
+    if (!menuContainer.contains(tgt)
+      && !$menuState.owner.contains(tgt)) {
       $menuState?.closeAction();
     }
-  });
+  }
+
+  document.addEventListener('click', closeHandler);
 
 </script>
 
