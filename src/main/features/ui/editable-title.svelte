@@ -10,53 +10,62 @@
   }
   /**
   * Wrapper function for manipulating the new value.
-  * It will be run at the end of the submit action
+  * It will be run at the end of the submit action.
   */
   export let renameAction: (newVal: string) => void;
   export let title: string;
+  /**
+  * The wrapper tag to render the element with.
+  */
+  export let tag = 'div';
+  export let classList: string[] = [];
+
+  $: classes = classList.join(' ');
 
   let isRenaming = false;
-  let inputElem: HTMLInputElement;
-  let inputValue: string = title;
+  let elemRef: HTMLElement;
 
   function handleKeys(e: KeyboardEvent): void {
+    if (!isRenaming) return;
     if (e.key === 'Enter' || e.key === 'Escape') {
-      inputElem.blur();
+      elemRef.blur();
     }
   }
+
   async function handleRename(): Promise<void> {
     isRenaming = true;
     await tick();
-    inputElem.focus();
+    elemRef.focus();
   }
+
   async function handleSubmit(): Promise<void> {
     isRenaming = false;
     await tick();
-    renameAction(inputValue);
+    renameAction(elemRef.innerText);
   }
+
 </script>
 
-{#if isRenaming}
-  <input type="text"
-    class="editable-title active"
-    bind:this={inputElem}
-    bind:value={inputValue}
-    on:keydown={handleKeys}
-    on:blur={handleSubmit}
-  />
-{:else}
+<svelte:element this={tag}
+  contenteditable={isRenaming}
+  class={classes}
+  on:click={handleRename}
+  on:keydown={handleKeys}
+  on:blur={handleSubmit}
+  bind:this={elemRef}
+>
   <span
     class="editable-title"
-    on:click={handleRename}
+    class:active={isRenaming}
   >
-    {title}
-</span>
-{/if}
+      {title}
+  </span>
+</svelte:element>
 
 
 <style>
 
-  input, span {
+  span {
     all: unset;
     font-size: inherit;
     font-family: inherit;
