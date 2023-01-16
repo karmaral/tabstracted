@@ -133,8 +133,8 @@
     box-shadow: 0 -0.1em 1em rgb(0 0 0 / 15%);
     background: var(--theme-main-bg);
     border: 1px solid gainsboro;
-    min-width: 20rem;
-    width: 100%;
+    min-width: var(--layout-min-item-width);
+    width: calc(100% - var(--layout-content-view-padding) * 2 - var(--layout-main-view-gap));
     max-width: var(--layout-max-item-width);
     font-size: .9rem;
     position: absolute;
