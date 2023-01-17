@@ -18,6 +18,7 @@ export interface GroupRenderData {
   collapsed_browser: boolean;
   color: chrome.tabGroups.ColorEnum;
   tabs_amount: number;
+  tab_ids: number[];
 }
 
 export interface WindowRenderData {
