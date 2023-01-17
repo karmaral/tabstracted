@@ -13,6 +13,7 @@ export interface ActionOption {
 }
 
 type MenuOptionType = 'entry' | 'separator';
+
 export interface MenuOption extends ActionOption {
   type: MenuOptionType;
   id?: { type: 'entry' } extends { type: MenuOptionType } ? string : never;
@@ -30,12 +31,13 @@ export interface MenuState {
   open: boolean;
   closeAction: () => void;
   entries: MenuOption[];
-  ref: HTMLDivElement;
+  ref: HTMLDivElement | null;
 }
 
 export type WaitingModeEnum = 'waiting' | 'loading' | null;
 
 export type ContentView = 'tab';
+
 
 export interface Tabstracted {
   init(): Promise<void>;

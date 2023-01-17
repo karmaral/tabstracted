@@ -48,7 +48,7 @@
         lastOwner: (!prev?.lastOwner?.elem)
           ? { elem: menuButton, closeAction: handleClose }
           : { elem: prev.owner, closeAction: prev.closeAction },
-        ref: prev.ref,
+        ref: prev?.ref,
       };
       return newState;
     });
