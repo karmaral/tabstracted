@@ -112,12 +112,13 @@
 
 <ContentItem
   id={idStr}
-  className="tab-entry {classes}"
+  classList={['tab-entry', classes]}
   options={hydratedOptions}
   {actions}
 >
   <Checkbox {selected} onSelect={handleSelect} draggable={true} />
   <img class="tab-icon" {src} alt="">
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div class="tab-title tab-switch-to ui-btn"
     on:click={handleSwitchTo}
   >

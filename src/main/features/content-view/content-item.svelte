@@ -4,7 +4,10 @@
   import ContentItemActions from './content-item-actions.svelte';
 
   export let id = '';
-  export let className: string;
+  /**
+   * Extra classes to be added to the main element.
+  */
+  export let classList: string[] = [];
   export let options: MenuOption[];
   export let actions: ActionOption[];
   /**
@@ -16,8 +19,11 @@
   */
   export let optionsButtonOrder: 'first' | 'last' = 'first';
 
-  let optionsOpen = false;
 
+  $: classes = ['content-item', ...classList].join(' ');
+
+
+  let optionsOpen = false;
   let thisElem: HTMLLIElement;
 
   $: if ($menuState) {
@@ -28,10 +34,10 @@
 </script>
 
 <li {id}
-class="content-item {className}"
-class:large={!inlineLayout}
-class:options-open={optionsOpen}
-bind:this={thisElem}
+  class={classes}
+  class:large={!inlineLayout}
+  class:options-open={optionsOpen}
+  bind:this={thisElem}
 >
   {#if inlineLayout}
     <div class="slot main">

@@ -89,7 +89,7 @@
 </script>
 
 <ContentItem
-  className="tab-group"
+  classList={['tab-group']}
   options={hydratedOptions}
   {actions}
   --color={data.color}
