@@ -23,7 +23,7 @@ Cross-browser support is on the roadmap aswell. For now, it only runs in Chrome/
 | --- | :---: | :---: |
 | Selection <br> (for batch operations) | ✔ | ✔ | 
 | Close         | ✔ | ✔ | 
-| Move to window | ✔ | |
+| Move to window | ✔ | ✔ |
 | Reorder       | | |
 | Add to group  | | |
 | Suspend       | ✔ | ✔ |
@@ -36,6 +36,7 @@ Cross-browser support is on the roadmap aswell. For now, it only runs in Chrome/
 | Rename | | - |
 | Ungroup  | | |
 | Collapse/Expand | ✔ | |
+| Move to window |  |  |
 
 ------
 
