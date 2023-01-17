@@ -80,6 +80,10 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
     case 'hub.tab.move_to_window':
       tabs.moveToWindow(message.tab_id, message.window_id);
       break;
+    case 'hub.tab.move_to_window_batch':
+      tabs.moveToWindow(message.tab_ids, message.window_id)
+        .then(() => sendResponse(true));
+      break;
     case 'hub.tab.suspend':
       tabs.suspend(message.tab_id)
       break;

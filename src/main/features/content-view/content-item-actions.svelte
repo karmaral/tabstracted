@@ -38,7 +38,8 @@
     margin-left: auto;
     opacity: 0;
   }
-  :global(.options-open) > .content-item-actions {
+  :global(.options-open) > .content-item-actions,
+  :global(.options-open.large .slot.header) > .content-item-actions {
     opacity: 1 !important;
   }
   .actions-wrapper {

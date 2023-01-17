@@ -21,7 +21,7 @@
   let thisElem: HTMLLIElement;
 
   $: if ($menuState) {
-    if (thisElem === $menuState?.owner?.parentElement.parentElement) {
+    if (thisElem && thisElem.contains($menuState?.owner as Node)) {
       optionsOpen = $menuState.open;
     }
   }

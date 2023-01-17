@@ -29,7 +29,7 @@
     flex-grow: 1;
     height: 100%;
     overflow: hidden;
-    padding-left: 2em;
+    padding-left: var(--layout-main-view-gap);
     position: relative;
   }
   .scroll-padding {

@@ -10,8 +10,9 @@
 
 <ContentList>
   {#each groups as data}
+    {@const groupTabs = tabs.filter((t) => t.group_id === data.id)}
     <TabGroup {data}>
-      {#each tabs.filter(t => t.group_id === data.id) as data}
+      {#each groupTabs as data}
         <TabItem {data} />
       {/each}
     </TabGroup>
@@ -23,4 +24,5 @@
 </ContentList>
 
 <style>
+
 </style>

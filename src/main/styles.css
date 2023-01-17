@@ -3,6 +3,9 @@
   --theme-main-bg: rgb(252, 252, 252);
   --theme-sidebar-bg: rgb(0 0 0 / 10%);
   --theme-sidebar-fg: rgb(0 0 0 / 70%);
+  --layout-main-view-gap: 1.5rem;
+  --layout-content-view-padding: 2.5rem;
+  --layout-min-item-width: 20rem;
   --layout-max-item-width: 55rem;
   --layout-action-bar-height: 3.1rem;
 }

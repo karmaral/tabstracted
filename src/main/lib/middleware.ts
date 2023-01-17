@@ -93,6 +93,13 @@ export function moveToWindow(tabId: number, windowId: number) {
     window_id: windowId,
 	});
 }
+export async function batchMoveToWindow(tabIds: number[], windowId: number) {
+	await chrome.runtime.sendMessage({
+		action: 'hub.tab.move_to_window_batch',
+		tab_ids: tabIds,
+    window_id: windowId,
+	});
+}
 export function suspendTab(tabId: number) {
   chrome.runtime.sendMessage({
     action: 'hub.tab.suspend',

@@ -16,6 +16,6 @@
     display: flex;
     flex: 1 1;
     min-height: 0;
-    padding-inline: 2.5rem;
+    padding-inline: var(--layout-content-view-padding);
   }
 </style>

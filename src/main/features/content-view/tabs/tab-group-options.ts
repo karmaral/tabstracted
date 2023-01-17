@@ -2,26 +2,33 @@ import type { MenuOption } from '$types';
 
 const options: MenuOption[] = [
   {
-    type: 'entry',
     id: 'close_all',
     label: 'Close All',
+    type: 'entry',
   },
   {
-    type: 'entry',
     id: 'rename',
-    label: 'Rename'
+    label: 'Rename',
+    type: 'entry',
   },
   {
-    type: 'entry',
     id: 'ungroup',
     label: 'Ungroup',
+    type: 'entry',
   },
   {
-    type: 'entry',
     id: 'move_to_window',
     label: 'Move to window',
-    children: [],
+    children: [
+      { type: 'separator' },
+      {
+        id: 'new_window',
+        label: 'New Window',
+        type: 'entry',
+      }
+    ],
     children_source: 'window',
+    type: 'entry',
   },
 ];
 
