@@ -5,7 +5,7 @@
 </script>
 
 <ul class="content-list" style:width >
-  <slot></slot>
+  <slot />
 </ul>
 
 <style>

@@ -41,7 +41,7 @@
 >
   {#if inlineLayout}
     <div class="slot main">
-      <slot></slot>
+      <slot />
     </div>
     <ContentItemActions
       {optionsButtonOrder}
@@ -50,7 +50,7 @@
     />
   {:else}
     <div class="slot header">
-      <slot name="header"></slot>
+      <slot name="header" />
       <ContentItemActions
         {optionsButtonOrder}
         {options}
@@ -59,7 +59,7 @@
     </div>
 
     <div class="slot main">
-      <slot></slot>
+      <slot />
     </div>
   {/if}
 </li>

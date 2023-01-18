@@ -109,7 +109,7 @@
   </div>
 
   <ContentList width={'100%'}>
-    <slot></slot>
+    <slot />
   </ContentList>
 
 </ContentItem>
