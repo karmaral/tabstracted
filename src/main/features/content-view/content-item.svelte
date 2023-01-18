@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dndzone } from 'svelte-dnd-action';
   import { menuState } from '$lib/stores';
   import type { MenuOption, ActionOption } from '$types';
   import ContentItemActions from './content-item-actions.svelte';
@@ -58,7 +59,10 @@
       />
     </div>
 
-    <div class="slot main">
+    <div
+      class="slot main"
+      use:dndzone={{ items:[] }}
+    >
       <slot></slot>
     </div>
   {/if}

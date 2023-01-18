@@ -9,16 +9,16 @@
 </script>
 
 <ContentList>
-  {#each groups as data}
+  {#each groups as data (data.id)}
     {@const groupTabs = tabs.filter((t) => t.group_id === data.id)}
     <TabGroup {data}>
-      {#each groupTabs as data}
+      {#each groupTabs as data (data.id)}
         <TabItem {data} />
       {/each}
     </TabGroup>
   {/each}
 
-  {#each ungroupedTabs as data}
+  {#each ungroupedTabs as data (data.id)}
     <TabItem {data} />
   {/each}
 </ContentList>

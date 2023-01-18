@@ -1,11 +1,35 @@
 <script lang="ts">
+  import { dndzone } from 'svelte-dnd-action'
+  import { onMount } from 'svelte';
 
   export let width = '';
 
+  let parentRef: HTMLUListElement;
+
+  let items = [];
+
+  function handleSort(e: CustomEvent) {
+    console.log(e.detail);
+    items = e.detail.items;
+  }
+
+  onMount(() => {
+    items = Array.from(parentRef.children)
+      .map((ch) =>({ ...ch, id: ch.getAttribute('id') }));
+    console.log(items);
+  });
+
 </script>
 
-<ul class="content-list" style:width >
-  <slot></slot>
+<ul
+  class="content-list"
+  style:width
+  use:dndzone={{items}}
+  on:consider={handleSort}
+  on:finalize={handleSort}
+  bind:this={parentRef}
+>
+  <slot />
 </ul>
 
 <style>
