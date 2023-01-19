@@ -87,6 +87,7 @@ const render: IRender = {
         });
         groupEntry.tabs_amount = groupTabs.length;
         groupEntry.tab_ids = groupTabs.map((t: Tab | chrome.tabs.Tab) => t.id);
+        groupEntry.index = groupTabs[0].index;
 
         groupList.push(groupEntry);
         continue;

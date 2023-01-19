@@ -15,28 +15,28 @@ async function onActionClicked() {
 async function onTabUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) {
   if (changeInfo.status === 'loading') return;
 
-  registry.listeners.tabUpdated(tabId, tab);
+  // registry.listeners.tabUpdated(tabId, tab);
   render.updateRenderData(tab.windowId);
   // TODO: the skeleton loading could be called from here
 }
 
 function onTabMoved(tabId: number, moveInfo: chrome.tabs.TabMoveInfo) {
-  registry.tabs.syncAllIndices();
+  // registry.tabs.syncAllIndices();
   render.updateRenderData(moveInfo.windowId);
 }
 
 function onTabDetached(tabId: number, detachInfo: chrome.tabs.TabDetachInfo) {
-  registry.tabs.syncAllIndices();
+  // registry.tabs.syncAllIndices();
   render.updateRenderData(detachInfo.oldWindowId);
 }
 
 function onTabAttached(tabId: number, attachInfo: chrome.tabs.TabAttachInfo) {
-  registry.tabs.syncAllIndices();
+  // registry.tabs.syncAllIndices();
   render.updateRenderData(attachInfo.newWindowId);
 }
 
 function onTabRemoved(tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) {
-  registry.tabs.remove(tabId);
+  // registry.tabs.remove(tabId);
   render.updateRenderData(removeInfo.windowId);
 }
 
@@ -76,6 +76,13 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       break;
     case 'hub.tab.switch_to':
       chrome.tabs.update(message.tab_id, { active: true });
+      break;
+    case 'hub.tab.reorder':
+      chrome.tabs.move(message.tab_id, {
+        index: message.new_pos,
+      });
+      break;
+    case 'hub.tab.reorder_batch':
       break;
     case 'hub.tab.move_to_window':
       tabs.moveToWindow(message.tab_id, message.window_id);
