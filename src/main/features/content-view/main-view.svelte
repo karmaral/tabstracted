@@ -15,7 +15,9 @@
     <ContentView>
       <div class="scroll-padding">
         <div class="tab-view">
+            {#key $currentWorkspace}
             <TabList {tabs} {groups} />
+            {/key}
         </div>
       </div>
     </ContentView>
