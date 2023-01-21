@@ -4,6 +4,7 @@
   import type { MenuOption } from '$types';
   import { selectedTabs, allWindows, menuState } from '$lib/stores';
   import { closeTab, switchToTab, moveToWindow, suspendTab } from '$lib/middleware';
+  import { ellipsis } from '$lib/utils';
   import { ContentItem } from '../.';
   import { Checkbox } from '$features/ui'
 
@@ -14,9 +15,7 @@
 
   $: ({ id, suspended } = data)
   $: idStr = `tab_${id}`;
-  $: title = data.title.length < 120
-    ? data.title
-    : `${data.title.substring(0, 120)}...`;
+  $: title = ellipsis(data.title);
   $: src = `${data.favicon_url || ""}`;
 
   $: selected  = $selectedTabs.includes(id);

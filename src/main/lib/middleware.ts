@@ -8,6 +8,7 @@ import {
   waitingMode as $waitingMode,
   storageLoaded as $storageLoaded,
 } from '$lib/stores';
+import { ellipsis } from '$lib/utils';
 
 // abstraction interface for dealing with background.js
 
@@ -41,9 +42,7 @@ export async function init() {
   $allWindows.set(allWindows.map((w) => {
     const labelTab = w.tabs.filter((t) => t.active)[0] || w.tabs[w.tabs.length - 1];
     const maxChars = 48;
-    const label = labelTab.title.length < maxChars
-      ? labelTab.title
-      : `${labelTab.title.substring(0, maxChars)}...`;
+    const label = ellipsis(labelTab.title, maxChars);
     return {
       id: w.id,
       title: label,
