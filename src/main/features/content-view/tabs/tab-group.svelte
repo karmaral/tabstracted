@@ -11,10 +11,10 @@
 
 
   export let data: GroupRenderData;
-
-  $: ({ title, tabs_amount, tab_ids } = data);
+  $: ({ id, title, tabs_amount, tab_ids, childrenData, collapsed_browser } = data);
   $: selected = $selectedTabs.some((id) => tab_ids?.includes(id));
 
+  let listElem: HTMLUListElement;
   let hydratedOptions: MenuOption[] = [];
 
   const optionCallbacks = {
@@ -89,12 +89,15 @@
 </script>
 
 <ContentItem
+  {id}
+  type="group"
   classList={['tab-group']}
   options={hydratedOptions}
   {actions}
-  --color={data.color}
-  inlineLayout={false}
-  optionsButtonOrder={'last'}
+  cssVars={{ color: data.color }}
+  optionsButtonOrder="last"
+  layout="group"
+  sortable={true}
 >
   <div slot="header">
   <Checkbox {selected} onSelect={handleSelect}/>
@@ -108,29 +111,41 @@
     </div>
   </div>
 
-  <ContentList width={'100%'}>
+  <ul class="content-list"
+    bind:this={listElem}
+  >
+    <slot />
+  </ul>
     <slot></slot>
   </ContentList>
 
 </ContentItem>
 
 <style>
-:global(.tab-group) {
-  margin-block: .5rem;
-  display: flex;
-  flex-direction: column;
-  gap: .5em;
-  padding: .5em;
-  background-color: rgb(0 0 0 / 5%);
-  border-left: 2px solid var(--color);
-}
-[slot] {
-  display: contents;
-}
-[slot="header"] > * {
-  line-height: 1.5;
-}
-.tab-group-amount, .tab-group-collapsed {
-  opacity: .7;
-}
+  .content-list {
+    position: relative;
+    display: flex;
+    padding-inline: 0;
+    width: 100%;
+  }
+  :global(li.item.tab-group) {
+    margin-block: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+    background-color: hsl(0, 0%, 95%);
+    border-left: 2px solid var(--color);
+  }
+  :global(li.item.tab-group > .item-content) {
+    padding: .5em;
+  }
+  [slot] {
+    display: contents;
+  }
+  [slot="header"] > * {
+    line-height: 1.5;
+  }
+  .tab-group-amount, .tab-group-collapsed {
+    opacity: .7;
+  }
 </style>

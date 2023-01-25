@@ -14,7 +14,6 @@
   export let data: TabRenderData;
 
   $: ({ id, suspended } = data)
-  $: idStr = `tab_${id}`;
   $: title = ellipsis(data.title);
   $: src = `${data.favicon_url || ""}`;
 
@@ -110,10 +109,12 @@
 </script>
 
 <ContentItem
-  id={idStr}
+  {id}
+  type="tab"
   classList={['tab-item', classes]}
   options={hydratedOptions}
   {actions}
+  sortable={true}
 >
   <Checkbox {selected} onSelect={handleSelect} draggable={true} />
   <img class="tab-icon" {src} alt="">

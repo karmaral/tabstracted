@@ -1,55 +1,89 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { menuState } from '$lib/stores';
   import type { MenuOption, ActionOption } from '$types';
   import ContentItemActions from './content-item-actions.svelte';
 
-  export let id = '';
+  export let id: string | number = '';
+  /**
+   * The type of item. Will be used for preffixing the id.
+  */
+  export let type = 'item';
   /**
    * Extra classes to be added to the main element.
   */
   export let classList: string[] = [];
+  /**
+  *  An object containing custom css variables to be applied on the main element.
+  * Currently, the changes are not diffed so any update reapplies all properties of the object.
+  */
+  export let cssVars: Record<string, string | number> = {};
   export let options: MenuOption[];
   export let actions: ActionOption[];
   /**
    * Whether the contents are displayed horizontally or vertically.
+   * The group layout allows nesting other items inside the element.
   */
-  export let inlineLayout = true;
+  export let layout: 'inline' | 'group' = 'inline';
   /**
    * Order for placing the options menu button.
   */
   export let optionsButtonOrder: 'first' | 'last' = 'first';
 
+  export let sortable = false;
 
-  $: classes = ['content-item', ...classList].join(' ');
+  $: classes = ['item', ...classList].join(' ');
+  $: idStr =  id ? `${type}_${id}` : '';
 
 
   let optionsOpen = false;
   let thisElem: HTMLLIElement;
+
+  $: inline = layout === 'inline';
 
   $: if ($menuState) {
     if (thisElem && thisElem.contains($menuState?.owner as Node)) {
       optionsOpen = $menuState.open;
     }
   }
+
+  function applyCssVars(vars: Record<string, string | number>) {
+    if (!thisElem) return;
+    Object.keys(vars).forEach((k) => {
+      thisElem.style.setProperty(`--${k}`, vars[k] as string);
+    });
+  }
+  $: applyCssVars(cssVars);
+
+  onMount(() => {
+    applyCssVars(cssVars);
+  });
+
 </script>
 
-<li {id}
+<li id={idStr}
   class={classes}
-  class:large={!inlineLayout}
+  class:large={!inline}
   class:options-open={optionsOpen}
+  class:sortable
+  data-id={id}
+  data-type={type}
   bind:this={thisElem}
 >
-  {#if inlineLayout}
-    <div class="slot main">
-      <slot></slot>
+  {#if inline}
+    <div class="item-content">
+      <div class="slot main">
+        <slot></slot>
+      </div>
+      <ContentItemActions
+        {optionsButtonOrder}
+        {options}
+        {actions}
+      />
     </div>
-    <ContentItemActions
-      {optionsButtonOrder}
-      {options}
-      {actions}
-    />
   {:else}
+  <div class="item-content">
     <div class="slot header">
       <slot name="header"></slot>
       <ContentItemActions
@@ -59,41 +93,49 @@
       />
     </div>
 
-    <div
-      class="slot main"
-      use:dndzone={{ items:[] }}
-    >
-      <slot></slot>
+    <div class="slot main" >
+      <slot />
     </div>
+  </div>
   {/if}
 </li>
 
 <style>
-  .content-item {
+  :global(.item) {
     --gap: 1em;
+    border: 1px solid rgb(0 0 0 / 33%);
+    background-color: var(--theme-main-bg);
+    list-style: none;
+  }
+  .item-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     gap: var(--gap);
     padding: .5em 1em;
-    border: 1px solid rgb(0 0 0 / 33%);
-    background-color: var(--theme-main-bg);
   }
-  .content-item:hover {
+  .item:hover > .item-content {
     background-color:rgb(0 0 0 / 3%);
   }
-  .content-item.large {
+  .item.large > .item-content {
     align-items: stretch;
     flex-direction: column;
+  }
+  .item.sortable {
+    position: absolute;
+    width: 100%;
   }
   .slot {
     display: flex;
     gap: var(--gap);
     align-items: center;
   }
-  :global(.content-item:hover > .content-item-actions),
-  :global(.content-item.large:hover > .slot.header > .content-item-actions) { opacity: 1; }
+  .item:hover > .item-content > :global(.item-actions),
+  .item.large:hover > .item-content > .slot.header > :global(.item-actions) { opacity: 1; }
 
-  :global(.content-item .action-btn) {
+  :global(.item .action-btn) {
     padding: .125rem;
   }
 </style>
