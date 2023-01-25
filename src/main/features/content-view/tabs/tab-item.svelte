@@ -111,7 +111,7 @@
 
 <ContentItem
   id={idStr}
-  classList={['tab-entry', classes]}
+  classList={['tab-item', classes]}
   options={hydratedOptions}
   {actions}
 >
@@ -126,17 +126,17 @@
 </ContentItem>
 
 <style>
-  :global(li.tab-entry) {
+  :global(li.tab-item) {
     position: relative;
   }
-  :global(li.tab-entry.selected) {
+  :global(li.tab-item.selected) {
     border-color: rgb(183 183 255);
     background: rgb(235 238 255);
   }
-  :global(li.tab-entry.selected:hover) {
+  :global(li.tab-item.selected:hover) {
     background: rgb(231 234 253);
   }
-  :global(li.tab-entry.suspended) .tab-title {
+  :global(li.tab-item.suspended) .tab-title {
     opacity: .7;
   }
   .tab-icon {
