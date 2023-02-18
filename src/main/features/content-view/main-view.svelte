@@ -1,6 +1,6 @@
 <script lang="ts">
   import { storageLoaded, currentWorkspace } from '$lib/stores';
-  import { ContentHeader, ContentView } from '.';
+  import { Header, ContentFrame } from '.';
   import { LoadingWidget } from '$features/ui';
   import TabList from './tabs';
 
@@ -8,19 +8,17 @@
 </script>
 
 <main>
-  {#if !$storageLoaded}
-    <LoadingWidget fontSize={'2em'} />
-  {:else}
-    <ContentHeader />
-    <ContentView>
+  {#if $storageLoaded && $currentWorkspace}
+    <Header />
+    <ContentFrame>
       <div class="scroll-padding">
         <div class="tab-view">
-            {#key $currentWorkspace}
-            <TabList {tabs} {groups} />
-            {/key}
+          <TabList {tabs} {groups} />
         </div>
       </div>
-    </ContentView>
+    </ContentFrame>
+  {:else}
+    <LoadingWidget fontSize={'2em'} />
   {/if}
 </main>
 
