@@ -36,6 +36,7 @@
         "vite": "^2.9.15"
     },
     "dependencies": {
+        "muuri": "^0.9.5",
         "svrollbar": "^0.12.0"
     }
 }
