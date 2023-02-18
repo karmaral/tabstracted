@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { dndzone } from 'svelte-dnd-action';
   import { menuState } from '$lib/stores';
   import type { MenuOption, ActionOption } from '$types';
-  import ContentItemActions from './content-item-actions.svelte';
+  import ItemActions from './item-actions.svelte';
 
   export let id: string | number = '';
   /**
@@ -32,13 +30,15 @@
   export let optionsButtonOrder: 'first' | 'last' = 'first';
 
   export let sortable = false;
-
-  $: classes = ['item', ...classList].join(' ');
-  $: idStr =  id ? `${type}_${id}` : '';
-
+  /**
+   * If `sortable`, used for keeping the order in sync.
+  */
+  export let index = 0;
 
   let optionsOpen = false;
   let thisElem: HTMLLIElement;
+
+  $: classes = ['item', ...classList].filter(Boolean).join(' ');
 
   $: inline = layout === 'inline';
 
@@ -56,27 +56,24 @@
   }
   $: applyCssVars(cssVars);
 
-  onMount(() => {
-    applyCssVars(cssVars);
-  });
-
 </script>
 
-<li id={idStr}
+<li
   class={classes}
   class:large={!inline}
   class:options-open={optionsOpen}
   class:sortable
   data-id={id}
   data-type={type}
+  data-index={index}
   bind:this={thisElem}
 >
   {#if inline}
     <div class="item-content">
       <div class="slot main">
-        <slot></slot>
+        <slot />
       </div>
-      <ContentItemActions
+      <ItemActions
         {optionsButtonOrder}
         {options}
         {actions}
@@ -86,7 +83,7 @@
   <div class="item-content">
     <div class="slot header">
       <slot name="header"></slot>
-      <ContentItemActions
+      <ItemActions
         {optionsButtonOrder}
         {options}
         {actions}
@@ -131,6 +128,15 @@
     display: flex;
     gap: var(--gap);
     align-items: center;
+  }
+  :global(.item.sortable.muuri-item-dragging) {
+    z-index: 3;
+  }
+  :global(.item.sortable.muuri-item-releasing) {
+    z-index: 2;
+  }
+  :global(.item.sortable.muuri-item-hidden) {
+    z-index: 0;
   }
   .item:hover > .item-content > :global(.item-actions),
   .item.large:hover > .item-content > .slot.header > :global(.item-actions) { opacity: 1; }

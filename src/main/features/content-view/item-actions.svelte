@@ -12,7 +12,7 @@
 
 </script>
 
-<div class="content-item-actions" >
+<div class="item-actions" >
   <MenuTrigger
     buttonClass="action-btn btn"
     icon={EllipsisVertical}
@@ -25,21 +25,26 @@
         class="action-btn btn"
         on:click={action.callback}
     >
-        <Icon src={action.iconSource} size={'1rem'} />
+        {#if action.label}
+          {action.label}
+        {/if}
+        {#if action.iconSource}
+          <Icon src={action.iconSource} size={'1rem'} />
+        {/if}
     </button>
     {/each}
   </div>
 </div>
 
 <style>
-  .content-item-actions {
+  .item-actions {
     display: flex;
     gap: var(--gap);
     margin-left: auto;
     opacity: 0;
   }
-  :global(.options-open) > .content-item-actions,
-  :global(.options-open.large .slot.header) > .content-item-actions {
+  :global(.options-open) > .item-actions,
+  :global(.options-open.large .slot.header) > .item-actions {
     opacity: 1 !important;
   }
   .actions-wrapper {
