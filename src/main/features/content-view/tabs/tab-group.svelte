@@ -1,38 +1,47 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, getContext } from 'svelte';
+  import { writable } from 'svelte/store';
   import { ArrowsPointingIn } from '@steeze-ui/heroicons'
+  import Muuri from 'muuri';
   import type { MenuOption } from '$types';
-  import type { GroupRenderData } from '$types/render';
-  import { ContentItem, ContentList } from '$features/content-view';
-  import { EditableTitle, Checkbox } from '$features/ui';
-  import { batchCloseTabs, batchMoveToWindow, collapseGroup } from '$lib/middleware';
+  import type { TabRenderData, GroupRenderData } from '$types/render';
+  import { Item, ContentList } from '$features/content-view';
+  import { EditableTitle, Checkbox, SortableList } from '$features/ui';
+  import { batchCloseTabs, batchMoveToWindow, collapseGroup, batchUngroupTabs } from '$lib/middleware';
   import { allWindows, menuState, selectedTabs } from '$lib/stores';
-  import options from './tab-group-options';
+  import { getDiff, refreshList } from './tab-list-utils';
 
+  import options from './tab-group-options';
+  import { TabItem, contextKey } from '.';
 
   export let data: GroupRenderData;
-  $: ({ id, title, tabs_amount, tab_ids, childrenData, collapsed_browser } = data);
+  export let childrenData: TabRenderData[];
+  $: ({ id, index, title, tabs_amount, tab_ids, collapsed_browser } = data);
   $: selected = $selectedTabs.some((id) => tab_ids?.includes(id));
 
   let listElem: HTMLUListElement;
+  let listHandler = writable<Muuri>();
   let hydratedOptions: MenuOption[] = [];
 
+  const ctx: { listHandler: Muuri; refreshMainList: () => void; } = getContext(contextKey);
   const optionCallbacks = {
     'close_all': handleCloseAll,
     'ungroup': handleUngroup,
-    'move_to_window': (windowId: number) => handleMoveToWindow(windowId)
+    'move_to_window': (windowId: number) => handleMoveToWindow(windowId),
+    'rename': () => {},
   }
 
   function handleCollapse() {
-    collapseGroup(data.id, !data.collapsed_browser);
+    collapseGroup(id, !data.collapsed_browser);
   }
 
   function handleCloseAll() {
     batchCloseTabs(tab_ids);
   }
 
-  function handleUngroup() {
-   // ...
+  async function handleUngroup() {
+    await batchUngroupTabs(tab_ids)
+    $menuState.closeAction();
   }
 
   async function handleMoveToWindow(windowId: number) {
@@ -79,16 +88,44 @@
       id: 'expand_collapse',
       label: 'Expand/Collapse',
       callback: handleCollapse,
-      iconSource: ArrowsPointingIn,
+      // iconSource: ArrowsPointingIn,
     }
   ];
 
+  function updateRenderList() {
+    const refreshOpts = {
+      listHandler: $listHandler,
+      renderList: childrenData,
+      listElem,
+      diffOptions: { nested: true, indexOffset: index[0] },
+    };
+    requestAnimationFrame(() => refreshList(refreshOpts));
+  }
+  $: if (childrenData) { updateRenderList(); }
   onMount(() => {
     hydratedOptions = hydrateOptions();
+    let initialized = false;
+    $listHandler = new Muuri(listElem, {
+      items: '.item',
+      dragEnabled: true,
+      sortData: {
+        index: (_item, elem) => {
+          return parseInt(elem.dataset.index);
+        },
+      },
+    });
+
+    $listHandler
+    .on('layoutStart', () => {
+      if (!initialized) {
+        ctx.refreshMainList();
+        initialized = true;
+      }
+    })
   });
 </script>
 
-<ContentItem
+<Item
   {id}
   type="group"
   classList={['tab-group']}
@@ -98,9 +135,11 @@
   optionsButtonOrder="last"
   layout="group"
   sortable={true}
+  index={index[0]}
 >
   <div slot="header">
-  <Checkbox {selected} onSelect={handleSelect}/>
+    <Checkbox {selected} onSelect={handleSelect} />
+    <span style="font-family: monospace; opacity: .8; font-size: 12px;">{JSON.stringify(data.index)}</span>
     <EditableTitle {title}
       classList={['tab-group-title']}
       renameAction={console.log}
@@ -114,12 +153,11 @@
   <ul class="content-list"
     bind:this={listElem}
   >
-    <slot />
+    {#each childrenData as data (data.id)}
+      <TabItem {data} />
+    {/each}
   </ul>
-    <slot></slot>
-  </ContentList>
-
-</ContentItem>
+</Item>
 
 <style>
   .content-list {

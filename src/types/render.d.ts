@@ -14,7 +14,7 @@ export interface TabRenderData {
 export interface GroupRenderData {
   id: number;
   title: string;
-  index: number;
+  index: [first: number, last: number];
   collapsed_ui: boolean;
   collapsed_browser: boolean;
   color: chrome.tabGroups.ColorEnum;

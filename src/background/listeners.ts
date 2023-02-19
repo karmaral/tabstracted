@@ -80,7 +80,7 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
     case 'hub.tab.reorder':
       chrome.tabs.move(message.tab_id, {
         index: message.new_pos,
-      });
+      }).then(() => sendResponse(true));
       break;
     case 'hub.tab.reorder_batch':
       break;
@@ -96,6 +96,10 @@ function onMessage(message: any, sender: chrome.runtime.MessageSender, sendRespo
       break;
     case 'hub.tab.suspend_batch':
       tabs.suspend(message.tab_ids)
+        .then(() => sendResponse(true));
+      break;
+    case 'hub.group.reorder':
+      tabs.reorderGroup(message.group_id, message.tab_ids, message.new_pos)
         .then(() => sendResponse(true));
       break;
     case 'hub.group.collapse':

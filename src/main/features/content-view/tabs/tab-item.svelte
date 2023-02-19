@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, getContext, tick } from 'svelte';
   import type { TabRenderData } from '$types/render';
   import type { MenuOption } from '$types';
   import { selectedTabs, allWindows, menuState } from '$lib/stores';
   import { closeTab, switchToTab, moveToWindow, suspendTab } from '$lib/middleware';
   import { ellipsis } from '$lib/utils';
-  import { ContentItem } from '../.';
+  import { Item  } from '../.';
+  import { contextKey } from '.';
   import { Checkbox } from '$features/ui'
 
   import { XMark } from '@steeze-ui/heroicons';
@@ -13,7 +14,7 @@
 
   export let data: TabRenderData;
 
-  $: ({ id, suspended } = data)
+  $: ({ id, suspended, index } = data)
   $: title = ellipsis(data.title);
   $: src = `${data.favicon_url || ""}`;
 
@@ -22,8 +23,9 @@
   $: tabStates = { selected, suspended };
   $: classes = Object.keys(tabStates).filter(c => tabStates[c]).join(' ');
 
-  let hydratedOptions: MenuOption[] = [];
+  const { listHandler } = getContext(contextKey);
 
+  let hydratedOptions: MenuOption[] = [];
   const optionCallbacks = {
     'move_to_window': (windowId: number) => handleMoveToWindow(windowId),
     'new_window': () => handleMoveToWindow(-1),
@@ -31,21 +33,30 @@
     'suspend': handleSuspend,
   }
 
-  function handleClose() {
+  function freeListItem() {
+    const item = $listHandler.getItems().filter(i => {
+      const el = i.getElement();
+      return parseInt(el.dataset.id) === id;
+    });
+    $listHandler.remove(item);
+  }
+  async function handleClose() {
+    freeListItem();
     closeTab(data);
     if (selected) {
       selectedTabs.remove(id);
     }
-    $menuState.closeAction();
+    $menuState?.closeAction();
   }
 
   function handleSuspend() {
     suspendTab(id);
-    $menuState.closeAction();
+    $menuState?.closeAction();
   }
 
   function handleSwitchTo() {
-    switchToTab(data);
+    //@TODO: prevent click if isSorting
+    switchToTab({...data, id});
   }
 
   function handleSelect() {
@@ -54,7 +65,8 @@
 
   function handleMoveToWindow(windowId: number) {
     moveToWindow(id, windowId);
-    $menuState.closeAction();
+    $menuState?.closeAction();
+    freeListItem();
   }
 
   function hydrateOptions() {
@@ -108,27 +120,30 @@
     });
 </script>
 
-<ContentItem
+<Item
   {id}
   type="tab"
   classList={['tab-item', classes]}
   options={hydratedOptions}
   {actions}
   sortable={true}
+  {index}
 >
   <Checkbox {selected} onSelect={handleSelect} draggable={true} />
   <img class="tab-icon" {src} alt="">
+  <span style="font-family: monospace; opacity: .8; font-size: 12px;">[{data.index}]</span>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div class="tab-title tab-switch-to ui-btn"
     on:click={handleSwitchTo}
   >
     {title}
   </div>
-</ContentItem>
+</Item>
 
 <style>
   :global(li.tab-item) {
     position: relative;
+    margin-block: .15em;
   }
   :global(li.tab-item.selected) {
     border-color: rgb(183 183 255);

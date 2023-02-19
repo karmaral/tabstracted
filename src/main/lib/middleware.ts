@@ -85,6 +85,13 @@ export function switchToTab(tab: TabRenderData) {
 		tab_id: tab.id,
 	});
 }
+export async function reorderTab(tabId: number, newPos: number) {
+  await chrome.runtime.sendMessage({
+    action: 'hub.tab.reorder',
+    tab_id: tabId,
+    new_pos: newPos,
+  });
+}
 export function moveToWindow(tabId: number, windowId: number) {
 	chrome.runtime.sendMessage({
 		action: 'hub.tab.move_to_window',
@@ -109,6 +116,14 @@ export async function batchSuspendTabs(ids: number[]): Promise<void> {
   await chrome.runtime.sendMessage({
     action: 'hub.tab.suspend_batch',
     tab_ids: ids,
+  });
+}
+export async function reorderGroup(groupId: number, tabIds: number[], newPos: number) {
+  await chrome.runtime.sendMessage({
+    action: 'hub.group.reorder',
+    group_id: groupId,
+    tab_ids: tabIds,
+    new_pos: newPos,
   });
 }
 export function collapseGroup(groupId: number, toggle: boolean) {
