@@ -21,6 +21,7 @@
 
   let listElem: HTMLUListElement;
   let listHandler = writable<Muuri>();
+  let draggingInner = false;
   let hydratedOptions: MenuOption[] = [];
 
   const ctx: { listHandler: Muuri; refreshMainList: () => void; } = getContext(contextKey);
@@ -116,6 +117,13 @@
     });
 
     $listHandler
+    .on('dragStart', () => {
+        draggingInner = true;
+    })
+    .on('dragEnd', () => {
+        const RELEASE_ANIM_LENGTH = 500;
+        setTimeout(() => draggingInner = false, RELEASE_ANIM_LENGTH);
+    })
     .on('layoutStart', () => {
       if (!initialized) {
         ctx.refreshMainList();
@@ -128,7 +136,7 @@
 <Item
   {id}
   type="group"
-  classList={['tab-group']}
+  classList={['tab-group', draggingInner ? 'dragging-inner' : '']}
   options={hydratedOptions}
   {actions}
   cssVars={{ color: data.color }}
@@ -176,6 +184,9 @@
   }
   :global(li.item.tab-group > .item-content) {
     padding: .5em;
+  }
+  :global(li.item.tab-group.dragging-inner) {
+    z-index: 10;
   }
   [slot] {
     display: contents;
