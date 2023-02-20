@@ -55,7 +55,8 @@
   }
 
   function handleSwitchTo() {
-    //@TODO: prevent click if isSorting
+    const item = document.querySelector(`li.item[data-id="${id}"]`);
+    if (item && item.classList.contains('muuri-item-releasing')) return;
     switchToTab({...data, id});
   }
 
