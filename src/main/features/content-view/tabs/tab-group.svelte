@@ -102,13 +102,15 @@
     };
     requestAnimationFrame(() => refreshList(refreshOpts));
   }
-  $: if (childrenData) { updateRenderList(); }
+
+  $: if (childrenData) updateRenderList();
   onMount(() => {
     hydratedOptions = hydrateOptions();
     let initialized = false;
     $listHandler = new Muuri(listElem, {
       items: '.item',
       dragEnabled: true,
+      dragContainer: document.body,
       sortData: {
         index: (_item, elem) => {
           return parseInt(elem.dataset.index);
@@ -117,12 +119,15 @@
     });
 
     $listHandler
-    .on('dragStart', () => {
-        draggingInner = true;
+    .on('dragStart', (item) => {
+      const elem = item.getElement();
+      elem.style.width = `${item.getWidth()}px`;
+      draggingInner = true;
     })
-    .on('dragEnd', () => {
-        const RELEASE_ANIM_LENGTH = 500;
-        setTimeout(() => draggingInner = false, RELEASE_ANIM_LENGTH);
+    .on('dragReleaseEnd', (item) => {
+      const elem = item.getElement();
+      elem.style.width = null;
+      draggingInner = false;
     })
     .on('layoutStart', () => {
       if (!initialized) {
@@ -172,6 +177,7 @@
     position: relative;
     display: flex;
     padding-inline: 0;
+    margin-block: 0;
     width: 100%;
   }
   :global(li.item.tab-group) {
@@ -184,9 +190,6 @@
   }
   :global(li.item.tab-group > .item-content) {
     padding: .5em;
-  }
-  :global(li.item.tab-group.dragging-inner) {
-    z-index: 10;
   }
   [slot] {
     display: contents;

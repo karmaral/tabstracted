@@ -17,6 +17,7 @@ body {
   height: 100%;
   margin: 0;
   font-family: var(--theme-font), system-ui, sans-serif;
+  overflow: hidden;
 }
 #app {
   display: flex;

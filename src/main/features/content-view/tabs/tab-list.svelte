@@ -13,7 +13,7 @@
   export let tabs: TabRenderData[];
   export let groups: GroupRenderData[];
 
-  $:  ungroupedTabs = tabs.filter((t) => t.group_id === -1);
+  $: ungroupedTabs = tabs.filter((t) => t.group_id === -1);
   let renderList: (TabRenderData | GroupRenderData)[] = [];
   let listElem: HTMLUListElement;
   let listHandler = writable<Muuri>();
@@ -23,19 +23,17 @@
   }
 
   function updateRenderList() {
-    const newList = [...groups, ...ungroupedTabs]
-      .sort((a, b) => {
-        const aI = Array.isArray(a.index) ? a.index[0] : a.index;
-        const bI = Array.isArray(b.index) ? b.index[0] : b.index;
-        return aI - bI;
-      });
+    const newList = [...groups, ...ungroupedTabs].sort((a, b) => {
+      const aI = Array.isArray(a.index) ? a.index[0] : a.index;
+      const bI = Array.isArray(b.index) ? b.index[0] : b.index;
+      return aI - bI;
+    });
 
     renderList = newList;
-
     refreshMainList();
   }
 
-  $: if (tabs) { updateRenderList(); }
+  $: if (tabs) updateRenderList();
 
   setContext(contextKey, { listHandler, refreshMainList });
   onMount(async () => {
@@ -44,15 +42,16 @@
     $listHandler = new Muuri(listElem, {
       items: '.item',
       dragEnabled: true,
+      dragContainer: document.body,
       dragStartPredicate: (item, e) => {
         const elem = item.getElement();
-        const { type } = elem.dataset
+        const { type } = elem.dataset;
 
         if (e.isFinal) {
           Muuri.ItemDrag.defaultStartPredicate(item, e);
           return;
         }
-        if ( type === 'group') {
+        if (type === 'group') {
           const subList = elem.querySelector('ul.content-list');
           const tgt = e.target as Node;
           if (subList.contains(tgt)) return false;
@@ -62,58 +61,57 @@
       sortData: {
         index: (_item, elem) => {
           return parseInt(elem.dataset.index);
-        }
+        },
       },
     });
     $listHandler
       .on('dragStart', (item, _e) => {
-        console.log('dragStart');
         fromIndex = $listHandler.getItems().indexOf(item);
-      });
+        const elem = item.getElement();
+        elem.style.width = `${item.getWidth()}px`;
+      })
+      .on('dragReleaseEnd', async (item) => {
+        const elem = item.getElement();
+        elem.style.width = null;
 
+        const items = $listHandler.getItems();
+        const newIndex = items.indexOf(item);
 
-    $listHandler.on('dragEnd', async (item, _e) => {
-      console.log('dragEnd');
-      const items = $listHandler.getItems();
-      const newIndex = items.indexOf(item);
+        let offset = 0;
+        items.forEach((itm, i) => {
+          if (i >= newIndex) return;
+          const elem = itm.getElement();
+          const { id, type } = elem.dataset;
 
-      let offset = 0;
-      items.forEach((itm, i) => {
-        if (i >= newIndex) return;
-        const elem = itm.getElement();
-        const { id, type } = elem.dataset;
+          if (type === 'group') {
+            const group = groups.find((g) => g.id === parseInt(id));
+            offset += group.tabs_amount;
+          }
+          if (type === 'tab') {
+            offset++;
+          }
+        });
+
+        // const to = items.indexOf(item);
+        const to = offset;
+
+        const { type } = elem.dataset;
+        const id = parseInt(elem.dataset.id);
 
         if (type === 'group') {
-          const group = groups.find(g => g.id === parseInt(id));
-          offset += group.tabs_amount;
+          const tab_ids = groups.find((g) => g.id === id).tab_ids || [];
+          console.log({ id, tab_ids, to });
+          await reorderGroup(id, tab_ids, to);
         }
         if (type === 'tab') {
-          offset++;
+          await reorderTab(id, to);
         }
       });
-
-
-      const to = offset;
-
-      const elem = item.getElement();
-      const { type } = elem.dataset;
-      const id = parseInt(elem.dataset.id);
-
-      if (type === 'group') {
-        const tab_ids = groups.find(g => g.id === id).tab_ids || [];
-        console.log({id, tab_ids, to });
-        await reorderGroup(id, tab_ids, to);
-      }
-      if (type === 'tab') {
-        await reorderTab(id, to);
-      }
-    } );
   });
 
 </script>
-<ul class="content-list"
-  bind:this={listElem}
 >
+<ul class="content-list" bind:this={listElem}>
   {#each renderList as data (data.id)}
     {#if 'url' in data}
       <TabItem {data} />
