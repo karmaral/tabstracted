@@ -1,0 +1,55 @@
+:root {
+  /* --theme-font: 'PT Sans'; */
+  --theme-font: 'Radio Canada';
+  --theme-color-main-bg: rgb(252, 252, 252);
+  --theme-color-sidebar-bg: rgb(0 0 0 / 10%);
+  --theme-color-sidebar-fg: rgb(0 0 0 / 70%);
+  --theme-color-accent: hsl(200deg 100% 50%);
+  --layout-main-view-gap: 1.5rem;
+  --layout-content-view-padding: 2.5rem;
+  --layout-min-item-width: 20rem;
+  --layout-max-item-width: 55rem;
+  --layout-action-bar-height: 3.1rem;
+  --shadow-mid: 0 .5em 1em rgb(0 0 0 / 15%);
+}
+*,*::before,*::after { box-sizing: border-box; }
+
+html { height: 100vh; }
+
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--theme-font), system-ui, sans-serif;
+  overflow: hidden;
+}
+#app {
+  display: flex;
+  height: 100%;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  display: inline-flex;
+}
+
+.ui-btn {
+  cursor: pointer !important;
+  user-select: none !important;
+}
+.btn {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--theme-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(0deg 0% 94%);
+  color: darkslategray;
+  border: 1px solid gainsboro;
+}
+.btn:hover:not(:disabled) {
+  background-color: hsl(0deg 0% 95.5%);
+}
+.btn:disabled {
+  opacity: .8;
+}

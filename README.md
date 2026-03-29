@@ -4,9 +4,7 @@
 An easy to use, feature-complete tab manager extension for organizing tabs into workspaces.
 
 ## Disclaimer
-I am currently in the process of migrating/rewriting everything in Typescript, so the software is of not much use, and you might see a lot of skeleton code aswell.
-
-Cross-browser support is on the roadmap aswell. For now, it only runs in Chrome/chromium based browsers.
+This project is undergoing a significant rewrite as I migrate to the more robust [WXT extension framework](https://github.com/wxt-dev/wxt), which has cross-browser support, and also rewriting the sortable implementation with [dnd-kit-svelte](https://github.com/hanielu/dnd-kit-svelte).
 
 ## Current Features
 
@@ -40,7 +38,7 @@ Cross-browser support is on the roadmap aswell. For now, it only runs in Chrome/
 
 ------
 
-This extension uses the [Svelte Typescript Chrome Extension Boilerplate](https://github.com/NekitCorp/chrome-extension-svelte-typescript-boilerplate)
+This extension uses the [WXT extension framework](https://github.com/wxt-dev/wxt).
 
 
 

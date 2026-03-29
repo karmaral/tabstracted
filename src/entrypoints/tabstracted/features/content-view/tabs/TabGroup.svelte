@@ -1,0 +1,277 @@
+<script lang="ts">
+  import { onMount, getContext } from 'svelte';
+  import { writable } from 'svelte/store';
+  import { ArrowsPointingIn, ArrowsPointingOut, ChevronDown, ChevronUp } from '@steeze-ui/heroicons'
+  import type { MenuOption } from '$types';
+  import type { TabRenderData, GroupRenderData } from '$types/render';
+  import { Item, ContentList } from '$features/content-view';
+  import { EditableTitle, Checkbox } from '$features/ui';
+  import { SortableList } from '$features/ui/sortable';
+  import { batchCloseTabs, batchMoveToWindow, collapseGroup, batchUngroupTabs } from '$libF/middleware.svelte';
+  import { allWindows, menuState, selectedTabs } from '$states';
+  // import { getDiff, refreshList } from './tab-list-utils';
+
+  import tabGroupOptions from './tab-group-options';
+  import { TabItem, contextKey } from '.';
+  import clsx from 'clsx';
+  import { SortableContext } from '@dnd-kit-svelte/sortable';
+  import { Icon } from '@steeze-ui/svelte-icon';
+
+  const fallbackTitle = 'Group (unnamed)';
+
+  interface Props {
+    data: GroupRenderData;
+    childrenData: TabRenderData[];
+    pickedUp?: boolean;
+  };
+  let {
+    data,
+    childrenData,
+    pickedUp = false,
+  }: Props = $props();
+  
+  let id = $derived(data.id);
+  let index = $derived(data.index_span);
+  let title = $derived(data.title || fallbackTitle);
+  let tabs_amount = $derived(data.tabs_amount);
+  let tab_ids = $derived(data.tab_ids);
+  let collapsed_browser = $derived(data.collapsed_browser);
+
+  let collapsed_ui: boolean = $state(false);
+
+  let selected = $derived(selectedTabs.array.some((id) => tab_ids?.includes(id)));
+  let partialSelection = $derived(!tab_ids.every(id => selectedTabs.array.includes(id)));
+
+  let listRef: HTMLUListElement = $state(document.createElement('ul'));
+  let draggingInner: boolean = $state(false);
+
+  // const ctx: { 
+  //   // listHandler: Muuri;
+  //   refreshMainList: () => void; 
+  // } = getContext(contextKey);
+
+  const actions = $derived([
+    {
+      id: 'expand_collapse_browser',
+      label: data.collapsed_browser ? 'Expand' : 'Collapse',
+      callback: handleBrowserCollapse,
+      iconSource: data.collapsed_browser ? ArrowsPointingOut : ArrowsPointingIn,
+    },
+    {
+      id: 'expand_collapse',
+      label: 'Expand/Collapse (UI)',
+      callback: handleCollapse,
+      iconSource: collapsed_ui ? ChevronDown : ChevronUp,
+      iconOnly: true,
+      class: 'ignore-selection-cancel',
+    }
+  ]);
+
+  let options: MenuOption[] = $state([]);
+
+  const optionCallbacks: Record<string, (...args: any[]) => unknown> = {
+    'close_all': handleCloseAll,
+    'ungroup': handleUngroup,
+    'move_to_window': (windowId: number) => handleMoveToWindow(windowId),
+    'rename': () => {},
+  };
+
+  function syncOptions() {
+    const syncedOptions = tabGroupOptions.map((obj) => ({...obj}));
+    syncedOptions.forEach((opt, i) => {
+      const optId = opt.id as string;
+      const optionCallback = optionCallbacks.hasOwnProperty(optId) ? optionCallbacks[optId] : undefined;
+      if (opt.children_source === 'window') {
+        opt.children = allWindows.value.map((w) => {
+          const result: MenuOption = {
+            type: 'entry',
+            id: w.id.toString(),
+            label: w.title,
+            callback: () => optionCallback?.(w.id), 
+          };
+          return result;
+        }).filter(ch => parseInt(ch.id!) !== data.window_id);
+
+        if (tabGroupOptions[i].children) {
+          const initial: MenuOption[] = tabGroupOptions[i].children.map((initialOpt) => {
+            const initialOptId = initialOpt.id as string;
+            const optionCallback = optionCallbacks.hasOwnProperty(initialOptId) ? optionCallbacks[initialOptId] : undefined;
+            if (optionCallback) {
+              return { 
+                ...initialOpt,
+                callback: () => optionCallback(),
+              };
+            }
+            return { ...initialOpt };
+          });
+
+          opt.children.push(...initial);
+        }
+      }
+
+      if (!opt.children?.length && optionCallback) {
+        opt.callback = optionCallback;
+      }
+    });
+    return syncedOptions;
+  }
+
+  function handleCollapse() {
+    // Can't mutate props, but how do I update it?
+    // data.collapsed_ui = !data.collapsed_ui;
+    collapsed_ui = !collapsed_ui;
+  }
+
+  function handleBrowserCollapse() {
+    collapseGroup(id, !data.collapsed_browser);
+  }
+
+  function handleCloseAll() {
+    batchCloseTabs(tab_ids);
+  }
+
+  async function handleUngroup() {
+    await batchUngroupTabs(tab_ids)
+    menuState.closeAction();
+  }
+
+  async function handleMoveToWindow(windowId: number) {
+    await batchMoveToWindow(tab_ids, windowId);
+    menuState.closeAction();
+  }
+
+  function handleSelect() {
+    if (partialSelection) {
+      selectedTabs.add(tab_ids);
+      return;
+    }
+    selectedTabs.remove(tab_ids);
+  }
+
+
+  function updateRenderList() {
+    // const refreshOpts = {
+    //   listHandler: $listHandler,
+    //   renderList: childrenData,
+    //   listElem: ref,
+    //   diffOptions: { nested: true, indexOffset: index[0] },
+    // };
+    // requestAnimationFrame(() => refreshList(refreshOpts));
+    // renderList = childrenData;
+  }
+
+  $effect(() => {
+    if (childrenData) {
+      updateRenderList();
+    }
+  });
+
+  $effect(() => {
+    if (allWindows.value) {
+      options = syncOptions();
+    }
+  });
+
+  onMount(() => {
+    options = syncOptions();
+  });
+</script>
+
+<Item
+  {id}
+  type="group"
+  sortable={true}
+  sortableAccepts={['tab']}
+  sortableParentId="toplevel"
+  classList={[
+    'tab-group',
+    { 
+      'dragging-inner' : draggingInner,
+      'picked-up': pickedUp,
+      'collapsed': collapsed_ui,
+    },
+  ]}
+  {options}
+  {actions}
+  {pickedUp}
+  cssVars={{ color: data.color }}
+  optionsButtonOrder="last"
+  layout="group"
+  index={index[0]}
+>
+  {#snippet header()}
+    {@const tabsAmountLabel = `${tabs_amount} tab${tabs_amount > 1 ? 's' : ''}` }
+    <div class="header-content">
+      <Checkbox {selected} {partialSelection} onSelect={handleSelect} />
+      <span style="font-family: monospace; opacity: .8; font-size: 12px;">{JSON.stringify(data.index_span)}</span>
+      <EditableTitle {title}
+        classList={['tab-group-title']}
+        renameAction={console.log}
+      />
+      <span class="tab-group-amount">{tabsAmountLabel}</span>
+      <div class="tab-group-collapsed">
+        {data.collapsed_browser ? 'Collapsed' : ''}
+      </div>
+    </div>
+    <button class="btn ui-toggle" onclick={handleCollapse}>
+      <Icon src={ChevronUp} size="1rem"/>
+    </button>
+  {/snippet}
+
+  {#snippet children()}
+    {@const id = `group-${data.id}`}
+    <SortableContext items={childrenData}>
+      <ContentList 
+        {id}
+        data={{ 
+          accepts: ['tab'],
+          parentId: id,
+        }}
+      >
+        {#each childrenData as tabData (tabData.id)}
+          <TabItem data={tabData} sortableParentId={id} />
+        {/each}
+      </ContentList>
+        <div></div>
+    </SortableContext>
+  {/snippet}
+</Item>
+
+<style>
+  :global(.item.tab-group) {
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+    background-color: hsl(0, 0%, 95%);
+    border-left: 2px solid;
+    border-left-color: var(--color, initial) !important;
+  }
+  :global(.item.tab-group.collapsed .slot.main) {
+    height: 0;
+    overflow: hidden;
+  }
+  :global(li.tab-group .select-box) {
+    visibility: hidden;
+  }
+  :global(.tab-group:not(:where(.placeholder, .busy, .picked-up)):hover .select-box), 
+  :global(.tab-group:not(:where(.placeholder, .busy, .picked-up)).selected .select-box) {
+    visibility: visible;
+  }
+  :global(.tab-group .slot.header) {
+    flex-wrap: wrap;
+  }
+  .ui-toggle {
+    order: 1;
+    flex-basis: 100%;
+    padding-block: .25em;
+  }
+  .header-content {
+    display: contents;
+  }
+  .header-content > * {
+    line-height: 1.5;
+  }
+  .tab-group-amount, .tab-group-collapsed {
+    opacity: .7;
+  }
+</style>

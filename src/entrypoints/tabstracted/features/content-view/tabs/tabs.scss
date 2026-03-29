@@ -1,0 +1,49 @@
+.tab-item {
+  // margin-block: .15em;
+  
+  &.selected {
+    border-color: hsl(from var(--theme-color-accent) calc(h + 40) s calc(l + 36));
+    background: hsl(from var(--theme-color-accent) calc(h + 31) s calc(l + 46));
+
+    &:hover {
+      background: rgb(231 234 253);
+    }
+  }
+
+  & .select-box {
+    opacity: 0;
+  }
+
+  &:not(:where(.placeholder, .busy, .picked-up)) {
+
+    &:where(.selected, :hover) .select-box {
+      opacity: 1;
+    }
+
+    .tab-title:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.suspended  {
+    border-style: dashed;
+    & .tab-title {
+      opacity: .7;
+    }
+  }
+
+
+  .tab-icon {
+    width: 1rem;
+    height: 1rem;
+    user-select: none;
+  }
+
+  .tab-title {
+    max-width: 60ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre;
+  }
+
+}
