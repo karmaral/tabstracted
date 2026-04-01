@@ -5,25 +5,12 @@
   import { debugDnDState, menuState } from '$states';
   import type { GroupRenderData, TabRenderData } from '$types/render';
   import { tabListState } from './states.svelte';
-  import {
-    reorderTab,
-    reorderGroup,
-    groupTab,
-  } from '$libF/middleware.svelte';
+  import { reorderTab, reorderGroup, groupTab } from '$libF/middleware.svelte';
   import { TabItem, TabGroup, contextKey } from '.';
-  import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit-svelte/sortable';
+  import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
+  import { CollisionPriority } from '@dnd-kit/abstract';
+  import { pointerDistance } from '@dnd-kit/collision';
   import { Droppable, SortableItem, dropAnimation, sensors } from '$features/ui/sortable';
-  import { 
-    DndContext,
-    DragOverlay,
-		type DragStartEvent,
-		type DragOverEvent,
-		type DragEndEvent,
-    closestCorners,
-    pointerWithin,
-    type Active,
-    type Over,
-  } from '@dnd-kit-svelte/core';
   import { sleep } from '$lib/utils';
   import { ContentList } from '$features/content-view';
 
@@ -330,57 +317,63 @@
 
 </script>
 
-<DndContext 
-  {sensors} 
+<DragDropProvider 
+  sensors={[KeyboardSensor, PointerSensor]}
   onDragStart={handleDragStart} 
   onDragOver={handleDragOver} 
   onDragEnd={handleDragEnd}
-  collisionDetection={pointerWithin}
 >
-  <SortableContext 
-    items={tabListState.renderList} 
-    strategy={verticalListSortingStrategy}
+  <Droppable
+    id="toplevel"
+    class="sortable-list"
+    tag="ul"
+    collisionDetector={() => pointerDistance}
+    collisionPriority={CollisionPriority.Lowest}
+    data={{ 
+      accepts: ['tab', 'group'],
+      parentId: 'toplevel',
+    }}
   >
-    <!-- TODO: Stretch the list DOM element so it can be targeted as 'toplevel' -->
-    <!-- Either that or just find a cleaner/more elegant way to target toplevel -->
-    <ContentList 
-      id="toplevel" 
-      data={{ 
-        accepts: ['tab', 'group'],
-        parentId: 'toplevel',
-      }}
-    >
-        {#each tabListState.renderList as data (data.id)}
-          {#if 'url' in data}
-              <div in:recieve={{ key: data.id }} out:send={{ key: data.id }}>
-                <TabItem {data} />
-              </div>
-          {:else}
-            {@const childrenData = tabs.filter((t) => t.group_id === data.id)}
-              <div in:recieve={{ key: data.id }} out:send={{ key: data.id }}>
-                <TabGroup {data} {childrenData} />
-              </div>
-          {/if}
-        {/each}
-    </ContentList>
-  </SortableContext>
+    {#each tabListState.renderList as data (data.id)}
+      {#if 'url' in data}
+          <div in:recieve={{ key: data.id }} out:send={{ key: data.id }}>
+            <TabItem {data} />
+          </div>
+      {:else}
+        {@const childrenData = tabs.filter((t) => t.group_id === data.id)}
+          <div in:recieve={{ key: data.id }} out:send={{ key: data.id }}>
+            <TabGroup {data} {childrenData} />
+          </div>
+      {/if}
+    {/each}
+  </Droppable>
 
   <DragOverlay 
-    {dropAnimation} 
-    wrapperElement="ul" 
+    tag="ul" 
     className="picked-up-wrapper"
   >
-    {#if activeSortableItem && activeSortableId}
-      {#if 'url' in activeSortableItem}
-        <TabItem data={activeSortableItem} pickedUp={true}/>
+    {#snippet children(source)}
+      {#if source.type === 'tab'}
+        {@const itemData = tabs.find(t => t.id === source.id)!}
+        <TabItem 
+          data={itemData} 
+          sortableIndex={0}
+          isPickedUp
+        />
       {:else}
-        {@const childrenData = tabs.filter((t) => t.group_id === activeSortableItem?.id)}
-        <TabGroup data={activeSortableItem} {childrenData} pickedUp={true}/>
+        {@const itemData = groups.find(g => g.id === source.id)!}
+        {@const childrenData = tabs.filter(t => t.group_id === activeSortableItem?.id)}
+        <TabGroup 
+          data={itemData} 
+          sortableIndex={0}
+          isPickedUp={true}
+          {childrenData} 
+        />
       {/if}
-    {/if}
+    {/snippet}
   </DragOverlay>
 
-</DndContext>
+</DragDropProvider>
 
 <style>
 </style>

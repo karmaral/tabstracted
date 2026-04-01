@@ -1,24 +1,30 @@
 <script lang="ts">
-  import { useDroppable, type UseDroppableArguments } from '@dnd-kit-svelte/core';
-  import { clsx, type ClassValue } from 'clsx';
+  import { useDroppable, type UseDroppableInput } from '@dnd-kit-svelte/svelte';
   import type { Snippet } from 'svelte';
+  import type { ClassValue } from 'svelte/elements';
 
-  interface Props extends UseDroppableArguments {
+  interface Props extends UseDroppableInput {
     children: Snippet;
     class?: ClassValue;
+    tag?: keyof HTMLElementTagNameMap;
   };
   let {
     children,
     class: className,
+    tag = 'div',
     ...rest
   }: Props = $props();
 
-  const droppable = useDroppable(rest);
+  const { ref } = useDroppable(rest);
 </script>
 
-<div class={clsx(['droppable', className])} bind:this={droppable.node.current}>
+<svelte:element
+  this={tag}
+  class={['droppable', className]} 
+  {@attach ref}
+>
   {@render children()}
-</div>
+</svelte:element> 
 
 
 

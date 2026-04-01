@@ -3,10 +3,8 @@
   import type { MenuOption, ActionOption } from '$types';
   import ItemActions from './ItemActions.svelte';
   import type { Snippet } from 'svelte';
-  import type { UniqueIdentifier } from '@dnd-kit-svelte/core';
-  import { useSortable } from '@dnd-kit-svelte/sortable';
-  import { CSS, styleObjectToString } from '@dnd-kit-svelte/utilities';
-  import clsx, { type ClassValue } from 'clsx';
+  import type { ClassValue } from 'svelte/elements';
+  import { useSortable } from '@dnd-kit-svelte/svelte/sortable';
 
   interface Props {
     id: string | number;
@@ -17,6 +15,10 @@
     sortable?: boolean;
     sortableAccepts: string[];
     sortableParentId: string;
+    sortableIndex: number;
+    sortableGroup: string;
+    sortableDisabled: boolean;
+    isPickedUp: boolean;
     /**
      * Extra classes to be added to the main element.
     */
@@ -37,11 +39,6 @@
      * Order for placing the options menu button.
     */
     optionsButtonOrder?: 'first' | 'last';
-    /**
-     * If `sortable`, used for keeping the order in sync.
-    */
-    index?: number;
-    pickedUp: boolean;
     children: Snippet;
     header?: Snippet;
     onClick?: (ev: MouseEvent) => void;
@@ -54,14 +51,16 @@
     sortable = false,
     sortableAccepts = [],
     sortableParentId = '',
+    sortableIndex = 0,
+    sortableGroup,
+    sortableDisabled = false,
     classList = [],
     cssVars = {},
     options = [],
     actions = [],
     layout = 'inline',
     optionsButtonOrder = 'first',
-    index = 0,
-    pickedUp = false,
+    isPickedUp = false,
     children,
     header,
     onClick = () => void 0,
@@ -70,37 +69,32 @@
 
 
   let optionsOpen: boolean = $state(false);
-  let ref: HTMLLIElement = $state(document.createElement('li'));
   let itemActionsRef: ReturnType<typeof ItemActions> | undefined = $state();
 
   let classes = $derived(clsx(['item', ...classList]));
   let inline = $derived(layout === 'inline');
 
-  const { 
-    attributes,
-    listeners,
-    node,
-    transform,
-    transition,
-    isDragging,
-    isSorting 
-  } = useSortable({ 
-    id,
-    data: { type, accepts: sortableAccepts, parentId: sortableParentId },
+  const { ref, isDragging, } = useSortable({ 
+    id: () => id,
+    type: () => type, 
+    index: () => sortableIndex,
+    accept: () => sortableAccepts,
+    group: () => sortableGroup,
+    disabled: () => sortableDisabled,
   });
 
-  const style = $derived(
-    styleObjectToString({
-      transform: CSS.Translate.toString(transform.current),
-      transition: isSorting.current ? transition.current : undefined,
-      zIndex: isDragging.current ? 1 : undefined,
-      ...parseCssVars(cssVars),
-    })
-  );
+  // const style = $derived(
+  //   styleObjectToString({
+  //     transform: CSS.Translate.toString(transform.current),
+  //     transition: isSorting.current ? transition.current : undefined,
+  //     zIndex: isDragging.current ? 1 : undefined,
+  //     ...parseCssVars(cssVars),
+  //   })
+  // );
 
 
   $effect(() => {
-    if (node?.current && node.current.contains(menuState?.owner as Node)) {
+    if (ref && ref.contains(menuState?.owner as Node)) {
       optionsOpen = menuState.open;
     }
   });
@@ -172,7 +166,7 @@
 
 <li 
   class="item-wrapper"
-  class:sortable
+  {@attach ref}
 >
   <div
     class={classes}
@@ -196,9 +190,9 @@
       {@render itemContent()}
     {/if}
 
-    <!-- {#if isDragging.current}
+    {#if !isPickedUp && isDragging.current}
       <div class="item-placeholder"></div>
-    {/if} -->
+    {/if}
   </div>
 </li>
 

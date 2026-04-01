@@ -25,12 +25,17 @@
   interface Props {
     data: TabRenderData;
     sortableParentId?: string;
-    pickedUp?: boolean;
+    sortableIndex: number;
+    sortableGroup?: string;
+    sortableDisable?: boolean;
+    isPickedUp?: boolean;
   };
   let {
     data,
-    sortableParentId = 'toplevel',
-    pickedUp = false,
+    sortableIndex,
+    sortableParentId = 'root',
+    sortableDisable = false,
+    isPickedUp = false,
   }: Props = $props();
 
   let id = $derived(data.id);
@@ -179,15 +184,15 @@
 
 <Item
   {id}
+  {sortableIndex}
   type="tab"
   sortable={true}
   sortableAccepts={['tab', 'group']}
   {sortableParentId}
   classList={['tab-item', classes]}
-  {pickedUp}
+  {isPickedUp}
   {options}
   {actions}
-  {index}
   onClick={handleSelect}
   onAuxClick={handleAuxClick}
 >
