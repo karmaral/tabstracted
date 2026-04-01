@@ -127,7 +127,7 @@
     const index = tabListState.renderList.findIndex(item => item.id === id);
     tabListState.renderList.splice(index, 1);
 
-    // closeTab(data);
+    closeTab(data);
 
     if (selected) {
       selectedTabs.remove(id);
