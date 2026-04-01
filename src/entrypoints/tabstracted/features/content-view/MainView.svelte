@@ -45,11 +45,9 @@
       <span>active: {debugDnDState.active} | over: {debugDnDState.over}</span>
     </div>
     <ContentFrame>
-      <div class="scroll-padding">
-        <div class="tab-view">
-          <BatchActionsBar />
-          <TabList {tabs} {groups} />
-        </div>
+      <div class="tab-view">
+        <BatchActionsBar />
+        <TabList {tabs} {groups} />
       </div>
     </ContentFrame>
   {:else}
@@ -66,8 +64,5 @@
     overflow: hidden;
     padding-left: var(--layout-main-view-gap);
     position: relative;
-  }
-  .scroll-padding {
-    padding-bottom: calc(var(--layout-action-bar-height) + 1rem);
   }
 </style>
