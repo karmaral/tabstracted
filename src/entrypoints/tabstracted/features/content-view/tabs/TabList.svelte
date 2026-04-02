@@ -4,15 +4,15 @@
   import { crossfade } from 'svelte/transition';
   import { debugDnDState, menuState } from '$states';
   import type { GroupRenderData, TabRenderData } from '$types/render';
-  import { tabListState } from './states.svelte';
+  import { renderListState } from './states.svelte';
   import { reorderTab, reorderGroup, groupTab } from '$libF/middleware.svelte';
   import { TabItem, TabGroup, contextKey } from '.';
   import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
   import { CollisionPriority } from '@dnd-kit/abstract';
   import { pointerDistance } from '@dnd-kit/collision';
   import { Droppable, SortableItem, dropAnimation, sensors } from '$features/ui/sortable';
-  import { sleep } from '$lib/utils';
-  import { ContentList } from '$features/content-view';
+  import { sleep, clamp } from '$lib/utils';
+  import { render } from 'svelte/server';
 
   interface Props {
     tabs: TabRenderData[];
@@ -26,6 +26,13 @@
   let ungroupedTabs = $derived.by(() => {
     return tabs.filter((t) => t.group_id === -1);
   });
+  let groupedTabs = $derived.by(() => {
+    const result: Record<number, TabRenderData[]> = {};
+    groups.forEach(g => {
+      result[g.id] = tabs.filter(t => t.group_id === g.id);
+    });
+    return result;
+  });
 
   // let renderList: (TabRenderData | GroupRenderData)[] = $state([]);
   // let pauseRenderListSync: boolean = $state(false);
@@ -33,9 +40,10 @@
   let listRef: HTMLUListElement = $state(document.createElement('ul'));
 
   let activeSortableId: number | null = $state(null);
-  // let activeSortableItem = $derived(renderList.find(item => item.id === activeSortableId) || null);
   let activeSortableItem: TabRenderData | GroupRenderData | null = $state(null);
   let activeSortableType: 'tab' | 'group' | null = $state(null);
+  let activeSortableTarget: string = $state('');
+  let activeInnerGroupSorting: number = $state(0);
 
 
   function updateRenderList() {
@@ -45,11 +53,17 @@
       return aIdx - bIdx;
     });
 
-    tabListState.renderList = newList;
+    renderListState.root = newList;
+
+    const groupRenderLists: Record<number, TabRenderData[]> = {};
+    groups.forEach(group => {
+      groupRenderLists[group.id] = tabs.filter(tab => tab.group_id === group.id);
+    });
+    renderListState.groups = groupRenderLists;
   }
 
   function maybeRefreshRenderList() {
-    if (tabListState.pauseRenderListSync) {
+    if (renderListState.pauseDataSync) {
       requestAnimationFrame(maybeRefreshRenderList);
     } else {
       updateRenderList();
@@ -62,22 +76,102 @@
     }
   });
 
-  // setContext(contextKey, { listHandler, refreshMainList });
 
   // TODO: This works as intended but I arrived to it kinda by accident
   // Figure it out + document it. 
   // Something to do with the i <= oldIndex || i >= newIndex I think
-  function calculateNewTabIndex(oldIndex: number, newIndex: number): number {
+  function calculateNewTabIndex__v0(oldIndex: number, newIndex: number): number {
     let offset = 0;
-    tabListState.renderList.forEach((item, i) => {
+    renderListState.root.forEach((item, i) => {
       if (i <= oldIndex || i >= newIndex) return;
       if ('url' in item) {
         offset++;
       } else {
-        offset += item.tab_ids.length;
+        offset += item.tab_ids.length - 1; // the group itself doesn't count
       }
     });
+    console.log(`newIndex: ${newIndex + offset} (${newIndex} + ${offset})`);
     return newIndex + offset;
+  }
+
+  function calculateTabIndex(fromDisplayIndex: number, toDisplayIndex: number) {
+    // let realIndex = renderListIndex;
+    // const groups = renderListState.topLevel.filter(item => {
+    //   return 'index_span' in item;
+    // });
+
+    // groups.forEach(group => {
+    //   const groupRenderIndex = renderListState.topLevel.findIndex(itm => itm.id === group.id);
+    //   if (groupRenderIndex < renderListIndex) {
+    //     realIndex += group.tab_ids.length - 1;
+    //   }
+    // });
+
+    // case 1, forward
+    // from 0 to 3 [0 1 2 3 X X]
+    // case 2, backwards
+    // from 3 to 1 [X 1 2 3 X X]
+    // so I need min/max to determine edges, accounting for 0 and array.length
+
+    // Assume target array is always root for now
+    const targetArray = $state.snapshot(renderListState.root);
+    const maxIndex = targetArray.length - 1;
+
+    const safeFrom = clamp(fromDisplayIndex, 0, maxIndex);
+    const safeTo = clamp(toDisplayIndex, 0, maxIndex);
+    const segmentMin = Math.min(safeFrom, safeTo);
+    const segmentMax = Math.max(safeFrom, safeTo);
+    const segment = targetArray.slice(segmentMin, segmentMax + 1);
+    const direction = fromDisplayIndex < toDisplayIndex ? 1 : -1;
+    console.log({ safeFrom, safeTo, segmentMin, segmentMax, segment, direction });
+
+    // Edge cases
+    if (safeTo === 0) {
+      console.log(`realIndex: ${safeTo}`);
+      return safeTo;
+    }
+
+    let realIndex: number;
+    if ('url' in targetArray[safeFrom]) {
+      realIndex = targetArray[safeFrom].index;
+    } else {
+      realIndex = targetArray[safeFrom].index_span[0];
+    }
+
+    segment.forEach(item => {
+      if ('url' in item) {
+        realIndex += 1 * direction;
+      } else {
+        if (item.id === targetArray[safeFrom].id) {
+          return;
+        }
+        const groupLength = item.tab_ids.length;
+        const groupOffset = groupLength > 1 
+          ? (direction > 0 ? groupLength : groupLength - 1) 
+          // ? (groupLength - 1)
+          : 1;
+        console.log({ groupOffset });
+        realIndex += groupOffset * direction;
+      }
+    });
+
+    // for (let i = 0; i < newDisplayIndex && i < renderListState.topLevel.length; i++) {
+    //   const item = renderListState.topLevel[i];
+    //   console.log($state.snapshot(item));
+    //   if ('index_span' in item) {
+    //     realIndex += item.tab_ids.length;
+    //   } else {
+    //     realIndex += 1;
+    //   }
+    // }
+
+    // old: 0, new: 1 breaks this (realIndex ends up at 0)
+    // if (oldDisplayIndex < newDisplayIndex) {
+    //   realIndex -= 1;
+    // }
+
+    console.log(`realIndex: ${realIndex}`);
+    return realIndex;
   }
 
   function getSortableInformation(active: Active, over: Over) {
@@ -104,73 +198,95 @@
     };
   }
 
-  function handleDragStart(ev: DragStartEvent) {
+  const handleDragStart: DragDropEvents['dragstart'] = (ev) => {
     menuState?.closeAction();
-    const { active } = ev;
-    activeSortableId = active.id as number;
-    activeSortableType = active.data?.type as 'tab' | 'group';
-    activeSortableItem = tabListState.renderList.find((item) => item.id === active.id) ?? null;
-    // pauseRenderListSync = true;
+    const { source } = ev.operation;
+    if (!source) return;
 
-    debugDnDState.active = ev.active.id as string;
+    console.log(ev.operation);
+    activeSortableId = (source.id) as number || null;
+    activeSortableType = source.data?.type as 'tab' | 'group';
+    activeSortableItem = renderListState.root.find(item => item.id === source.id) || null;
+    renderListState.pauseDataSync = true;
+
+    // debugDnDState.active = ev.active.id as string;
   }
 
-  function handleDragOver(ev: DragOverEvent) {
-    const { active, over } = ev;
-    if (!over) return;
+  const handleDragOver: DragDropEvents['dragover'] = (ev) => {
+    const { source, target } = ev.operation;
+    if (!source || !target) return;
 
-    debugDnDState.over = ev.over!.id as string;
+    // console.log(target);
+    activeSortableTarget = `${ev.operation.target?.type?.toString() || ''} - ${ev.operation.target?.sortable?.group || ''}`;
 
-    // const a = $state.snapshot(active);
-    // const o = $state.snapshot(over);
-    // console.log('dragOver', {active: a, over: o});
-    const activeItem = tabListState.renderList.find(item => item.id === active.id);
-    const overItem = tabListState.renderList.find(item => item.id === over.id);
+    // TODO: I can use sortable.disabled for temporarily halting the parent from reacting
 
-    if (!activeItem || !overItem || activeItem === overItem) return;
-
-
-    // handle container drag-over (TODO)
-    // if (over.id === 'group') {
-    //  activeItem. ???
-    //  }
-    // example just moves the item from one 'container' to another
-    //
-
-
-    // const newIndex = renderList.findIndex(item => item.id === over.id);
-
-
-    // if ('url' in activeItem) {
-    //   reorderTab(activeItem.id, newIndex);
-    // } else {
-    //   reorderGroup(activeItem.id, newIndex);
+    if (source.sortable?.group !== 'root') { // inside group
+    //   // const srcIndex = source.index!;
+    //   // doesnt work because its derived - should be a 'manually derived' render list coming from the store?
+    //   const movedChildren = move(renderListState.groups[source.data.parentId], ev);
+    //   // console.log(ev.operation, $state.snapshot(groupedTabs), { prev: groupedTabs});
+    //   renderListState.groups[source.data.parentId] = movedChildren;
+    //   return;
     // }
 
-    // Update the activeItem to match the container it's being dragged over
-    // activeItem.??? = overItem.???
+    // TODO: somehow wait a bit before sorting
+    // so that the input can be guided to the correct place
+    // (actually sort or just drop in group) 
+    // if (source.type === 'group') {
+    //   return;
+    }
+    if (target.sortable?.group !== 'root') {
+      const groupId = Number((target.sortable?.group as string).replace('group-', ''));
+      activeInnerGroupSorting = groupId;
+    }
+    // renderlist move
+    // renderListState.topLevel = move(renderListState.topLevel, ev);
   }
 
-  async function handleDragEnd(ev: DragEndEvent) {
-    const { active, over } = ev;
-    if (!over) return;
-
-    const { 
-      activeParentId,
-      activeType,
-      activeRelativeIndex,
-      overParentId,
-      overType,
-      overRelativeIndex,
-      acceptsTab,
-      acceptsGroup,
-    } = getSortableInformation(active, over);
+  const handleDragEnd: DragDropEvents['dragend'] = async (ev) => {
+    if (!ev.operation.source) return;
+    const source = ev.operation.source as any /* SortableDraggable */
+    const target = ev.operation.target as any /* SortableDraggable */
+    const newIndex = source.sortable.index;
+    console.log({ 
+      initial_index: source.sortable.initialIndex,
+      new_index: source.sortable.index,
+    });
 
     // Didn't move
-    if (activeRelativeIndex === overRelativeIndex && activeParentId === overParentId) {
+    if (source.sortable.initialIndex === newIndex && source.sortable.group === target.sortable.group) {
       activeSortableId = null;
       return;
     }
+
+    if (source.sortable.group !== 'root') {
+      console.log('moving inner tabs');
+      const groupId = Number((source.sortable?.group as string).replace('group-', ''));
+      // renderListState.groups[groupId] = move(renderListState.groups[groupId], ev);
+      return;
+    }
+
+    if (source.sortable.group === 'root') {
+
+      const newTabIndex = calculateTabIndex(source.sortable.initialIndex, source.index);
+      if (source.type === 'group') {
+        console.log(`moving group, newTabIndex: ${newTabIndex}`);
+        data.moveGroup(source.id, newTabIndex);
+      } else if (source.type === 'tab') {
+        console.log('moving tab (toplevel)');
+        data.moveTab(source.id, newTabIndex);
+      }
+    }
+    // renderListState.topLevel = move(renderListState.topLevel, ev);
+    // renderlist move
+    // renderListState.pauseDataSync = false;
+    activeSortableTarget = '';
+
+
+    // --- OLD FUNCTION BELOW, EVALUATE & MIGRATE
+
+
 
     let oldIndex: number = activeRelativeIndex;
     let newIndex: number = overRelativeIndex;
@@ -227,10 +343,10 @@
 
       // - wait until animation is completed to re-sync
       await sleep(dropAnimation.duration as number);
-      tabListState.pauseRenderListSync = false;
+      renderListState.pauseDataSync = false;
 
-      debugDnDState.active = '';
-      debugDnDState.over = '';
+      // debugDnDState.active = '';
+      // debugDnDState.over = '';
       activeSortableId = null;
     }
 
@@ -324,26 +440,34 @@
   onDragEnd={handleDragEnd}
 >
   <Droppable
-    id="toplevel"
+    id="root"
     class="sortable-list"
     tag="ul"
     collisionDetector={() => pointerDistance}
     collisionPriority={CollisionPriority.Lowest}
     data={{ 
       accepts: ['tab', 'group'],
-      parentId: 'toplevel',
+      parentId: 'root',
     }}
   >
-    {#each tabListState.renderList as data (data.id)}
-      {#if 'url' in data}
-          <div in:recieve={{ key: data.id }} out:send={{ key: data.id }}>
-            <TabItem {data} />
-          </div>
+    {#each renderListState.root as item, index (item.id)}
+      {#if 'url' in item}
+        <div in:recieve={{ key: item.id }} out:send={{ key: item.id }}>
+          <TabItem 
+            data={item}
+            sortableIndex={index}
+          />
+        </div>
       {:else}
-        {@const childrenData = tabs.filter((t) => t.group_id === data.id)}
-          <div in:recieve={{ key: data.id }} out:send={{ key: data.id }}>
-            <TabGroup {data} {childrenData} />
-          </div>
+        {@const childrenData = groupedTabs[item.id]}
+        <div in:recieve={{ key: item.id }} out:send={{ key: item.id }}>
+          <TabGroup 
+            data={item} 
+            sortableIndex={index}
+            {childrenData} 
+            sortableDisabled={activeInnerGroupSorting === item.id}
+          />
+        </div>
       {/if}
     {/each}
   </Droppable>
@@ -366,7 +490,7 @@
         <TabGroup 
           data={itemData} 
           sortableIndex={0}
-          isPickedUp={true}
+          isPickedUp
           {childrenData} 
         />
       {/if}

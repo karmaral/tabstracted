@@ -1,41 +1,48 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
-  import { writable } from 'svelte/store';
   import { ArrowsPointingIn, ArrowsPointingOut, ChevronDown, ChevronUp } from '@steeze-ui/heroicons'
   import type { MenuOption } from '$types';
   import type { TabRenderData, GroupRenderData } from '$types/render';
   import { Item, ContentList } from '$features/content-view';
   import { EditableTitle, Checkbox } from '$features/ui';
-  import { SortableList } from '$features/ui/sortable';
   import { batchCloseTabs, batchMoveToWindow, collapseGroup, batchUngroupTabs } from '$libF/middleware.svelte';
   import { allWindows, menuState, selectedTabs } from '$states';
   // import { getDiff, refreshList } from './tab-list-utils';
 
   import tabGroupOptions from './tab-group-options';
   import { TabItem, contextKey } from '.';
-  import clsx from 'clsx';
-  import { SortableContext } from '@dnd-kit-svelte/sortable';
   import { Icon } from '@steeze-ui/svelte-icon';
+  import Droppable from '$features/ui/sortable/Droppable.svelte';
+  import { CollisionPriority } from '@dnd-kit/abstract';
 
   const fallbackTitle = 'Group (unnamed)';
 
   interface Props {
     data: GroupRenderData;
     childrenData: TabRenderData[];
-    pickedUp?: boolean;
+    sortableIndex: number;
+    sortableParentId?: string;
+    sortableGroup?: string;
+    sortableDisabled?: boolean;
+    isPickedUp?: boolean;
   };
   let {
     data,
     childrenData,
-    pickedUp = false,
+    sortableIndex,
+    sortableGroup = 'root',
+    sortableDisabled = false,
+    isPickedUp = false,
   }: Props = $props();
   
-  let id = $derived(data.id);
-  let index = $derived(data.index_span);
+  let {
+    id,
+    index_span: index,
+    tabs_amount,
+    tab_ids,
+    collapsed_browser
+  } = $derived(data);
   let title = $derived(data.title || fallbackTitle);
-  let tabs_amount = $derived(data.tabs_amount);
-  let tab_ids = $derived(data.tab_ids);
-  let collapsed_browser = $derived(data.collapsed_browser);
 
   let collapsed_ui: boolean = $state(false);
 
@@ -44,11 +51,6 @@
 
   let listRef: HTMLUListElement = $state(document.createElement('ul'));
   let draggingInner: boolean = $state(false);
-
-  // const ctx: { 
-  //   // listHandler: Muuri;
-  //   refreshMainList: () => void; 
-  // } = getContext(contextKey);
 
   const actions = $derived([
     {
@@ -182,22 +184,24 @@
   type="group"
   sortable={true}
   sortableAccepts={['tab']}
-  sortableParentId="toplevel"
+  sortableParentId="root"
+  {sortableIndex}
+  {sortableDisabled}
+  {sortableGroup}
+  {isPickedUp}
   classList={[
     'tab-group',
     { 
       'dragging-inner' : draggingInner,
-      'picked-up': pickedUp,
+      'picked-up': isPickedUp,
       'collapsed': collapsed_ui,
     },
   ]}
   {options}
   {actions}
-  {pickedUp}
-  cssVars={{ color: data.color }}
   optionsButtonOrder="last"
   layout="group"
-  index={index[0]}
+  cssVars={{ color: data.color }}
 >
   {#snippet header()}
     {@const tabsAmountLabel = `${tabs_amount} tab${tabs_amount > 1 ? 's' : ''}` }
@@ -220,20 +224,25 @@
 
   {#snippet children()}
     {@const id = `group-${data.id}`}
-    <SortableContext items={childrenData}>
-      <ContentList 
+    <div class="inner-container">
+      <Droppable
         {id}
-        data={{ 
-          accepts: ['tab'],
-          parentId: id,
-        }}
+        tag="ul"
+        accept="tab"
+        class="sortable-list"
+        collisionPriority={CollisionPriority.High}
       >
-        {#each childrenData as tabData (tabData.id)}
-          <TabItem data={tabData} sortableParentId={id} />
+        <!-- TODO: Somehow make the droppable dormant until a threshold of 'over', 
+        so that quick toplevel sorts aren't sucked in by this -->
+        {#each childrenData as child, childIndex (child.id)}
+          <TabItem 
+            data={child} 
+            sortableIndex={childIndex}
+            sortableGroup={id}
+          />
         {/each}
-      </ContentList>
-        <div></div>
-    </SortableContext>
+      </Droppable>
+    </div>
   {/snippet}
 </Item>
 
@@ -273,5 +282,8 @@
   }
   .tab-group-amount, .tab-group-collapsed {
     opacity: .7;
+  }
+  .inner-container {
+    width: 100%;
   }
 </style>

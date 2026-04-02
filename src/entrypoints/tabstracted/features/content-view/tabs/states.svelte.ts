@@ -1,10 +1,12 @@
 import { GroupRenderData, TabRenderData } from '$types/render';
 
-interface TabListState {
-  renderList: (TabRenderData | GroupRenderData)[];
-  pauseRenderListSync: boolean;
+interface RenderListState {
+  root: (TabRenderData | GroupRenderData)[];
+  groups: Record<number, TabRenderData[]>;
+  pauseDataSync: boolean;
 }
-export const tabListState: TabListState = $state({
-  renderList: [],
-  pauseRenderListSync: false,
+export const renderListState: RenderListState = $state({
+  root: [],
+  groups: {},
+  pauseDataSync: false,
 });
