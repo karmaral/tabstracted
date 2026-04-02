@@ -53,3 +53,36 @@ h1,h2,h3,h4,h5,h6 {
 .btn:disabled {
   opacity: .8;
 }
+
+/* ScrollArea */
+[data-scroll-area-root] {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+[data-scroll-area-viewport] {
+  width: 100%;
+  height: 100%;
+}
+
+[data-scroll-area-scrollbar] {
+  width: .625rem;
+  transition: all .2s;
+  background-color: oklch(0 0 0 / .075);
+  border-radius: 1rem;
+
+  &:hover {
+    width: .75rem;
+  }
+}
+
+[data-scroll-area-thumb] {
+  display: flex;
+  background: rgb(173, 173, 173);
+  border-radius: 1rem;
+  user-select: none;
+  touch-action: none;
+
+}

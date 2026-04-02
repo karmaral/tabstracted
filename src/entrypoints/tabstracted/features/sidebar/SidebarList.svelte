@@ -1,5 +1,6 @@
 <script lang="ts">
   import { workspaceList } from '$states';
+  import { ScrollArea } from '$features/ui';
   import { SidebarItem } from '.';
 
   let activeIds: string[] = $state([]);
@@ -7,9 +8,11 @@
 </script>
 
 <div class="workspace-list">
-  {#each workspaceList as data}
-    <SidebarItem {data} active={activeIds.includes(data.id as string)}/>
-  {/each}
+  <ScrollArea>
+    {#each workspaceList as data}
+      <SidebarItem {data} active={activeIds.includes(data.id as string)}/>
+    {/each}
+  </ScrollArea>
 </div>
 
 <style>
