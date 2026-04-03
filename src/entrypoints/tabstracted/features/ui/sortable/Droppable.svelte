@@ -25,14 +25,3 @@
 >
   {@render children()}
 </svelte:element> 
-
-
-
-<style>
-  .droppable {
-    display: flex;
-    flex-direction: column;
-    gap: inherit;
-  }
-
-</style>

@@ -10,7 +10,7 @@
   import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
   import { CollisionPriority } from '@dnd-kit/abstract';
   import { pointerDistance } from '@dnd-kit/collision';
-  import { Droppable, SortableItem, dropAnimation, sensors } from '$features/ui/sortable';
+  import { Droppable } from '$features/ui/sortable';
   import { sleep, clamp } from '$lib/utils';
   import { render } from 'svelte/server';
 
@@ -174,29 +174,29 @@
     return realIndex;
   }
 
-  function getSortableInformation(active: Active, over: Over) {
-    active = $state.snapshot(active);
-    over = $state.snapshot(over);
-    console.log('getSortableInformation', { active, over });
-    const activeParentId: string = active.data?.parentId;
-    const activeType =  active.data?.type as 'tab' | 'group';
-    const activeRelativeIndex: number = active.data?.sortable.index;
-    const overParentId: string = over.data?.parentId;
-    const overType =  over.data?.type as 'tab' | 'group' | undefined;
-    const overRelativeIndex: number = over.data?.sortable.index;
-    const acceptsTab = over.data?.accepts?.includes('tab') ?? false;
-    const acceptsGroup = over.data?.accepts?.includes('group') ?? false;
-    return { 
-      activeParentId,
-      activeType,
-      activeRelativeIndex,
-      overParentId,
-      overType,
-      overRelativeIndex,
-      acceptsTab,
-      acceptsGroup,
-    };
-  }
+  // function getSortableInformation(active: Active, over: Over) {
+  //   active = $state.snapshot(active);
+  //   over = $state.snapshot(over);
+  //   console.log('getSortableInformation', { active, over });
+  //   const activeParentId: string = active.data?.parentId;
+  //   const activeType =  active.data?.type as 'tab' | 'group';
+  //   const activeRelativeIndex: number = active.data?.sortable.index;
+  //   const overParentId: string = over.data?.parentId;
+  //   const overType =  over.data?.type as 'tab' | 'group' | undefined;
+  //   const overRelativeIndex: number = over.data?.sortable.index;
+  //   const acceptsTab = over.data?.accepts?.includes('tab') ?? false;
+  //   const acceptsGroup = over.data?.accepts?.includes('group') ?? false;
+  //   return { 
+  //     activeParentId,
+  //     activeType,
+  //     activeRelativeIndex,
+  //     overParentId,
+  //     overType,
+  //     overRelativeIndex,
+  //     acceptsTab,
+  //     acceptsGroup,
+  //   };
+  // }
 
   const handleDragStart: DragDropEvents['dragstart'] = (ev) => {
     menuState?.closeAction();
@@ -207,41 +207,22 @@
     activeSortableId = (source.id) as number || null;
     activeSortableType = source.data?.type as 'tab' | 'group';
     activeSortableItem = renderListState.root.find(item => item.id === source.id) || null;
-    renderListState.pauseDataSync = true;
 
     // debugDnDState.active = ev.active.id as string;
   }
 
   const handleDragOver: DragDropEvents['dragover'] = (ev) => {
-    const { source, target } = ev.operation;
+    const source = ev.operation.source as any /* SortableDraggable */
+    const target = ev.operation.target as any /* SortableDraggable */
     if (!source || !target) return;
 
     // console.log(target);
-    activeSortableTarget = `${ev.operation.target?.type?.toString() || ''} - ${ev.operation.target?.sortable?.group || ''}`;
+    activeSortableTarget = `${target.type?.toString() || ''} - ${target.sortable?.group || ''}`;
 
     // TODO: I can use sortable.disabled for temporarily halting the parent from reacting
-
-    if (source.sortable?.group !== 'root') { // inside group
-    //   // const srcIndex = source.index!;
-    //   // doesnt work because its derived - should be a 'manually derived' render list coming from the store?
-    //   const movedChildren = move(renderListState.groups[source.data.parentId], ev);
-    //   // console.log(ev.operation, $state.snapshot(groupedTabs), { prev: groupedTabs});
-    //   renderListState.groups[source.data.parentId] = movedChildren;
-    //   return;
-    // }
-
     // TODO: somehow wait a bit before sorting
     // so that the input can be guided to the correct place
     // (actually sort or just drop in group) 
-    // if (source.type === 'group') {
-    //   return;
-    }
-    if (target.sortable?.group !== 'root') {
-      const groupId = Number((target.sortable?.group as string).replace('group-', ''));
-      activeInnerGroupSorting = groupId;
-    }
-    // renderlist move
-    // renderListState.topLevel = move(renderListState.topLevel, ev);
   }
 
   const handleDragEnd: DragDropEvents['dragend'] = async (ev) => {
@@ -254,48 +235,68 @@
       new_index: source.sortable.index,
     });
 
+    const sourceGroup = source.sortable.group;
+    const targetGroup = target.sortable.group;
+
     // Didn't move
-    if (source.sortable.initialIndex === newIndex && source.sortable.group === target.sortable.group) {
+    if (source.sortable.initialIndex === newIndex && sourceGroup === targetGroup) {
       activeSortableId = null;
       return;
     }
 
-    if (source.sortable.group !== 'root') {
-      console.log('moving inner tabs');
+    renderListState.pauseDataSync = true;
+
+    // Sorting tabs inside a group
+    if (sourceGroup !== 'root') {
+      console.log('moving inner tabs | Implement');
       const groupId = Number((source.sortable?.group as string).replace('group-', ''));
       // renderListState.groups[groupId] = move(renderListState.groups[groupId], ev);
+
+
+      // Implement: Ungroup into root
+      if (targetGroup === 'root') {
+
+      }
+
+      // Implement: Move into another group
+      if (targetGroup !== 'root' && targetGroup !== sourceGroup) {
+
+      }
+
+      renderListState.pauseDataSync = false;
       return;
     }
 
-    if (source.sortable.group === 'root') {
+    // Toplevel sorting
+    if (sourceGroup === 'root') {
+
+      // Implement: Drop into group
+      if (targetGroup !== 'root') {
+        const groupId = Number((source.sortable?.group as string).replace('group-', ''));
+        // Implement: calculate true index with group offsets
+
+        // tabs moved in between a group's tabs get grouped into it.
+        reorderTab(source.id, newIndex);
+      }
 
       const newTabIndex = calculateTabIndex(source.sortable.initialIndex, source.index);
       if (source.type === 'group') {
         console.log(`moving group, newTabIndex: ${newTabIndex}`);
-        data.moveGroup(source.id, newTabIndex);
+        reorderGroup(source.id, newTabIndex);
       } else if (source.type === 'tab') {
-        console.log('moving tab (toplevel)');
-        data.moveTab(source.id, newTabIndex);
+        console.log('moving tab (root)');
+        reorderTab(source.id, newTabIndex);
       }
+
     }
+
     // renderListState.topLevel = move(renderListState.topLevel, ev);
     // renderlist move
-    // renderListState.pauseDataSync = false;
+    renderListState.pauseDataSync = false;
     activeSortableTarget = '';
 
 
     // --- OLD FUNCTION BELOW, EVALUATE & MIGRATE
-
-
-
-    let oldIndex: number = activeRelativeIndex;
-    let newIndex: number = overRelativeIndex;
-    let newTabIndex: number;
-    let activeItem: TabRenderData | GroupRenderData;
-
-    tabListState.pauseRenderListSync = true;
-
-    console.log('dragEnd', { active, over });
 
     // TODO: (because I'm out of time)
     // ev seems to have active/over.sortable, which has
@@ -303,52 +304,52 @@
     // I need to get to this with a clearer head, but this might be a good crutch/solution
     // Also activeParentId is not working because Item doesn't define parentId in useSortable
 
-    if (activeParentId === 'toplevel') {
-      activeItem = tabListState.renderList[oldIndex];
-      console.log(activeItem);
+    // if (activeParentId === 'toplevel') {
+    //   activeItem = tabListState.renderList[oldIndex];
+    //   console.log(activeItem);
       
-      // Drop into Group (unfinished)
-      if (activeType === 'tab' && overParentId.startsWith('group')) {
-        const groupId = Number(overParentId.replace('group-', ''));
-        const targetGroup = tabListState.renderList.find(item => item.id === groupId) as GroupRenderData;
-        const [fromIndex, toIndex] = targetGroup.index_span;
-        newTabIndex = fromIndex + overRelativeIndex;
+    //   // Drop into Group (unfinished)
+    //   if (activeType === 'tab' && overParentId.startsWith('group')) {
+    //     const groupId = Number(overParentId.replace('group-', ''));
+    //     const targetGroup = tabListState.renderList.find(item => item.id === groupId) as GroupRenderData;
+    //     const [fromIndex, toIndex] = targetGroup.index_span;
+    //     newTabIndex = fromIndex + overRelativeIndex;
 
-        groupTab(activeItem.id, targetGroup.id);
+    //     groupTab(activeItem.id, targetGroup.id);
 
-        // TODO: Then somehow sort inside of the group (haven't figured out yet)
-        // The data-altering code should be straightforward, but I'm not sure how to prompt
-        // a user-based sorting inside the container (and coming from toplevel)
-        // reoderTab(activeItem.id, newTabIndex);
+    //     // TODO: Then somehow sort inside of the group (haven't figured out yet)
+    //     // The data-altering code should be straightforward, but I'm not sure how to prompt
+    //     // a user-based sorting inside the container (and coming from toplevel)
+    //     // reoderTab(activeItem.id, newTabIndex);
 
 
-        // Early return
-        tabListState.pauseRenderListSync = false;
-        return;
-      }
+    //     // Early return
+    //     tabListState.pauseRenderListSync = false;
+    //     return;
+    //   }
 
-      // Regular toplevel move
-      newIndex = tabListState.renderList.findIndex(item => item.id === over.id);
-      newTabIndex = calculateNewTabIndex(oldIndex, newIndex);
+    //   // Regular toplevel move
+    //   newIndex = tabListState.renderList.findIndex(item => item.id === over.id);
+    //   newTabIndex = calculateNewTabIndex(oldIndex, newIndex);
 
-      // - visually move the items
-      tabListState.renderList = arrayMove(tabListState.renderList, oldIndex, newIndex);
+    //   // - visually move the items
+    //   tabListState.renderList = arrayMove(tabListState.renderList, oldIndex, newIndex);
 
-      // - update source data
-      if (activeType === 'tab') {
-        reorderTab(activeItem.id, newTabIndex);
-      } else {
-        reorderGroup(activeItem.id, newTabIndex);
-      }
+    //   // - update source data
+    //   if (activeType === 'tab') {
+    //     reorderTab(activeItem.id, newTabIndex);
+    //   } else {
+    //     reorderGroup(activeItem.id, newTabIndex);
+    //   }
 
-      // - wait until animation is completed to re-sync
-      await sleep(dropAnimation.duration as number);
-      renderListState.pauseDataSync = false;
+    //   // - wait until animation is completed to re-sync
+    //   await sleep(dropAnimation.duration as number);
+    //   renderListState.pauseDataSync = false;
 
-      // debugDnDState.active = '';
-      // debugDnDState.over = '';
-      activeSortableId = null;
-    }
+    //   // debugDnDState.active = '';
+    //   // debugDnDState.over = '';
+    //   activeSortableId = null;
+    // }
 
 
     // if (activeType === 'tab') {
@@ -500,4 +501,16 @@
 </DragDropProvider>
 
 <style>
+  :global(.sortable-list) {
+    display: grid;
+    flex-direction: column;
+    gap: .5rem;
+    margin-block: 0;
+    padding-inline: 0;
+    width: 100%;
+    min-width: var(--layout-min-item-width);
+    max-width: var(--layout-max-item-width);
+    position: relative;
+
+  }
 </style>

@@ -3,7 +3,7 @@
   import { ArrowsPointingIn, ArrowsPointingOut, ChevronDown, ChevronUp } from '@steeze-ui/heroicons'
   import type { MenuOption } from '$types';
   import type { TabRenderData, GroupRenderData } from '$types/render';
-  import { Item, ContentList } from '$features/content-view';
+  import { Item } from '$features/content-view';
   import { EditableTitle, Checkbox } from '$features/ui';
   import { batchCloseTabs, batchMoveToWindow, collapseGroup, batchUngroupTabs } from '$libF/middleware.svelte';
   import { allWindows, menuState, selectedTabs } from '$states';

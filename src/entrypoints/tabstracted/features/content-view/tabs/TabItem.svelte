@@ -6,8 +6,8 @@
   import { closeTab, switchToTab, moveToWindow, suspendTab } from '$libF/middleware.svelte';
   import { ellipsis } from '$libF/utils';
   import { Item } from '$features/content-view';
-  import { tabListState } from './states.svelte';
-  import { dropAnimation } from '$features/ui/sortable';
+  import { renderListState } from './states.svelte';
+  // import { dropAnimation } from '$features/ui/sortable';
   import { Checkbox } from '$features/ui'
 
   import { XMark } from '@steeze-ui/heroicons';
@@ -126,11 +126,11 @@
   async function handleClose() {
     // TODO: Add pause render sync + interface with sortable
 
-    tabListState.pauseRenderListSync = true;
+    renderListState.pauseDataSync = true;
 
     // update visually
-    const index = tabListState.renderList.findIndex(item => item.id === id);
-    tabListState.renderList.splice(index, 1);
+    const index = renderListState.root.findIndex(item => item.id === id);
+    renderListState.root.splice(index, 1);
 
     closeTab(data);
 
@@ -141,7 +141,7 @@
 
     // wait for animation before resync
     // await sleep(dropAnimation.duration!);
-    // tabListState.pauseRenderListSync = false;
+    renderListState.pauseDataSync = false;
   }
 
   function handleSuspend() {

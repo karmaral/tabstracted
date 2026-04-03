@@ -5,6 +5,7 @@
   import type { Snippet } from 'svelte';
   import type { ClassValue } from 'svelte/elements';
   import { useSortable } from '@dnd-kit-svelte/svelte/sortable';
+  import { isShorthandPropertyAssignment } from 'typescript';
 
   interface Props {
     id: string | number;
@@ -71,8 +72,8 @@
   let optionsOpen: boolean = $state(false);
   let itemActionsRef: ReturnType<typeof ItemActions> | undefined = $state();
 
-  let classes = $derived(clsx(['item', ...classList]));
   let inline = $derived(layout === 'inline');
+  let elemRef: HTMLLIElement | null  = $state(null);
 
   const { ref, isDragging, } = useSortable({ 
     id: () => id,
@@ -94,7 +95,7 @@
 
 
   $effect(() => {
-    if (ref && ref.contains(menuState?.owner as Node)) {
+    if (elemRef && elemRef.contains(menuState?.owner as Node)) {
       optionsOpen = menuState.open;
     }
   });
@@ -166,22 +167,23 @@
 
 <li 
   class="item-wrapper"
+  bind:this={elemRef}
   {@attach ref}
 >
   <div
-    class={classes}
-    class:large={!inline}
-    class:options-open={optionsOpen}
-    class:busy={isSorting.current}
-    class:picked-up={pickedUp}
-    class:placeholder={isDragging.current}
+    class={[
+      'item',
+      {
+        large: !inline,
+        'options-open': optionsOpen,
+        'picked-up': isPickedUp,
+        placeholder: isDragging.current,
+      },
+      ...classList
+    ]}
     data-id={id}
     data-type={type}
-    data-index={index}
-    bind:this={node.current}
-    {style}
-    {...listeners.current}
-    {...attributes.current}
+    data-index={sortableIndex}
     oncontextmenu={handleContextMenu}
   >
     {#if inline}
