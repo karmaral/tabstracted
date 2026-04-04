@@ -45,7 +45,7 @@ import Droppable from './Droppable.svelte';
 // );
 const sensors = [
   PointerSensor.configure({
-    activationCoestraints: [
+    activationConstraints: [
       new PointerActivationConstraints.Distance({ value: 10 }),
     ],
   }),
