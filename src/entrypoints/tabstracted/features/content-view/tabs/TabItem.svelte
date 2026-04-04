@@ -12,7 +12,6 @@
 
   import { XMark } from '@steeze-ui/heroicons';
   import tabItemOptions from './tab-item-options';
-    import { sleep } from '$lib/utils';
 
   const fallbackSvg = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#aeaeae" >
@@ -24,17 +23,16 @@
 
   interface Props {
     data: TabRenderData;
-    sortableParentId?: string;
     sortableIndex: number;
     sortableGroup?: string;
-    sortableDisable?: boolean;
+    sortableDisabled?: boolean;
     isPickedUp?: boolean;
   };
   let {
     data,
     sortableIndex,
-    sortableParentId = 'root',
-    sortableDisable = false,
+    sortableGroup = 'root',
+    sortableDisabled = false,
     isPickedUp = false,
   }: Props = $props();
 
@@ -54,7 +52,15 @@
 
   let options: MenuOption[] = $state([]);
 
-  // const { listHandler } = getContext(contextKey);
+  const isRoot = $derived(data.group_id === -1);
+  const accept: [string, ...string[]] = $derived.by(() => {
+    if (isRoot) {
+      return ['tab', 'group'];
+    }
+    return ['tab'];
+
+  });
+
 
   const actions = [
     {
@@ -186,11 +192,11 @@
   {id}
   {sortableIndex}
   type="tab"
-  sortable={true}
-  sortableAccepts={['tab', 'group']}
-  {sortableParentId}
-  classList={['tab-item', classes]}
+  sortableAccepts={accept}
+  {sortableDisabled}
+  {sortableGroup}
   {isPickedUp}
+  classList={['tab-item', classes]}
   {options}
   {actions}
   onClick={handleSelect}

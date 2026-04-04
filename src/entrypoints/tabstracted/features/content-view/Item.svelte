@@ -5,7 +5,6 @@
   import type { Snippet } from 'svelte';
   import type { ClassValue } from 'svelte/elements';
   import { useSortable } from '@dnd-kit-svelte/svelte/sortable';
-  import { isShorthandPropertyAssignment } from 'typescript';
 
   interface Props {
     id: string | number;
@@ -13,9 +12,7 @@
      * The type of item. Will be used for preffixing the id.
     */
     type: string;
-    sortable?: boolean;
     sortableAccepts: string[];
-    sortableParentId: string;
     sortableIndex: number;
     sortableGroup: string;
     sortableDisabled: boolean;
@@ -49,9 +46,7 @@
   let {
     id = '',
     type,
-    sortable = false,
     sortableAccepts = [],
-    sortableParentId = '',
     sortableIndex = 0,
     sortableGroup,
     sortableDisabled = false,
@@ -120,18 +115,20 @@
 </script>
 
 {#snippet itemContentInline()}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class="item-content" 
     class:invisible={isDragging.current}
+    onclick={onClick}
+    onauxclick={onAuxClick}
   >
   <span class="id-label">{id}</span>
-    <button 
+    <!-- <button 
       class="background-action pointer-target"
       type="button"
       aria-label="Select"
-      onclick={onClick}
-      onauxclick={onAuxClick}
-    ></button>
+    ></button> -->
     <div class="slot main">
       {@render children?.()}
     </div>
@@ -170,6 +167,7 @@
   bind:this={elemRef}
   {@attach ref}
 >
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class={[
       'item',

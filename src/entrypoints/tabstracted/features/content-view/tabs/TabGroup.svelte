@@ -182,9 +182,7 @@
 <Item
   {id}
   type="group"
-  sortable={true}
   sortableAccepts={['tab']}
-  sortableParentId="root"
   {sortableIndex}
   {sortableDisabled}
   {sortableGroup}

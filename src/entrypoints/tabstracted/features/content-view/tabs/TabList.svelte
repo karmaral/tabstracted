@@ -10,7 +10,7 @@
   import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
   import { CollisionPriority } from '@dnd-kit/abstract';
   import { pointerDistance } from '@dnd-kit/collision';
-  import { Droppable } from '$features/ui/sortable';
+  import { Droppable, sensors } from '$features/ui/sortable';
   import { sleep, clamp } from '$lib/utils';
   import { render } from 'svelte/server';
 
@@ -435,21 +435,17 @@
 </script>
 
 <DragDropProvider 
-  sensors={[KeyboardSensor, PointerSensor]}
+  {sensors}
   onDragStart={handleDragStart} 
   onDragOver={handleDragOver} 
   onDragEnd={handleDragEnd}
 >
+    <!-- collisionDetector={() => pointerDistance}
+    collisionPriority={CollisionPriority.Lowest} -->
   <Droppable
     id="root"
     class="sortable-list"
     tag="ul"
-    collisionDetector={() => pointerDistance}
-    collisionPriority={CollisionPriority.Lowest}
-    data={{ 
-      accepts: ['tab', 'group'],
-      parentId: 'root',
-    }}
   >
     {#each renderListState.root as item, index (item.id)}
       {#if 'url' in item}

@@ -9,6 +9,8 @@
 //   MouseSensorOptions,
 // } from '@dnd-kit-svelte/core';
 // import { CSS } from '@dnd-kit-svelte/utilities';
+import { PointerSensor, KeyboardSensor } from '@dnd-kit-svelte/svelte';
+import { PointerActivationConstraints } from '@dnd-kit/dom';
 import Droppable from './Droppable.svelte';
 
 // const dropAnimation: DropAnimationOptions = {
@@ -41,9 +43,17 @@ import Droppable from './Droppable.svelte';
 //     },
 //   } as MouseSensorOptions)
 // );
+const sensors = [
+  PointerSensor.configure({
+    activationCoestraints: [
+      new PointerActivationConstraints.Distance({ value: 10 }),
+    ],
+  }),
+  KeyboardSensor,
+];
 
 export {
   Droppable,
-  // sensors,
+  sensors,
   // dropAnimation,
 };
