@@ -75,7 +75,7 @@
     get index() { return sortableIndex },
     get type() { return type; }, 
     get group() { return sortableGroup; },
-    // accept: () => sortableAccepts,
+    get accept() { return sortableAccepts; },
     // disabled: () => sortableDisabled,
   });
 

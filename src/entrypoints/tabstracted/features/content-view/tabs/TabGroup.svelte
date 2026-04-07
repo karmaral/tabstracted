@@ -228,7 +228,7 @@
         tag="ul"
         accept="tab"
         class="sortable-list"
-        collisionPriority={CollisionPriority.High}
+        collisionPriority={CollisionPriority.Normal}
       >
         <!-- TODO: Somehow make the droppable dormant until a threshold of 'over', 
         so that quick toplevel sorts aren't sucked in by this -->

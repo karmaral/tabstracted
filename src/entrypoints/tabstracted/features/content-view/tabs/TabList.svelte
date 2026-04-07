@@ -9,9 +9,9 @@
   import { TabItem, TabGroup, contextKey } from '.';
   // import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
   import type { ComponentProps } from 'svelte';
-  import { DragDropProvider, DragOverlay } from '@dnd-kit/svelte';
+  import { DragDropProvider, DragOverlay }  from '@dnd-kit/svelte';
   import { CollisionPriority } from '@dnd-kit/abstract';
-  import { pointerDistance } from '@dnd-kit/collision';
+  // import { pointerDistance } from '@dnd-kit/collision';
   import { Droppable, sensors } from '$features/ui/sortable';
   import { sleep, clamp } from '$lib/utils';
   import { isSortableOperation } from '@dnd-kit/svelte/sortable';
@@ -443,6 +443,7 @@
 </script>
 
 <DragDropProvider 
+  {sensors}
   onDragStart={handleDragStart} 
   onDragOver={handleDragOver} 
   onDragEnd={handleDragEnd}

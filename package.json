@@ -28,8 +28,8 @@
     "wxt": "^0.20.11"
   },
   "dependencies": {
-    "@dnd-kit-svelte/svelte": "^0.1.6",
     "@dnd-kit/abstract": "^0.3.2",
+    "@dnd-kit/dom": "^0.3.2",
     "@dnd-kit/helpers": "^0.3.2",
     "@dnd-kit/svelte": "^0.3.2",
     "@steeze-ui/svelte-icon": "^1.6.2",
