@@ -4,7 +4,7 @@
   import ItemActions from './ItemActions.svelte';
   import type { Snippet } from 'svelte';
   import type { ClassValue } from 'svelte/elements';
-  import { useSortable } from '@dnd-kit-svelte/svelte/sortable';
+  import { createSortable } from '@dnd-kit/svelte/sortable';
 
   interface Props {
     id: string | number;
@@ -70,14 +70,16 @@
   let inline = $derived(layout === 'inline');
   let elemRef: HTMLLIElement | null  = $state(null);
 
-  const { ref, isDragging, } = useSortable({ 
-    id: () => id,
-    type: () => type, 
-    index: () => sortableIndex,
-    accept: () => sortableAccepts,
-    group: () => sortableGroup,
-    disabled: () => sortableDisabled,
+  const sortable = createSortable({
+    get id() { return id },
+    get index() { return sortableIndex },
+    get type() { return type; }, 
+    get group() { return sortableGroup; },
+    // accept: () => sortableAccepts,
+    // disabled: () => sortableDisabled,
   });
+
+  const isPlaceholder = $derived(!isPickedUp && (sortable.isDragging || sortable.isDropping));
 
   // const style = $derived(
   //   styleObjectToString({
@@ -118,8 +120,7 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
-    class="item-content" 
-    class:invisible={isDragging.current}
+    class={['item-content']}
     onclick={onClick}
     onauxclick={onAuxClick}
   >
@@ -143,8 +144,7 @@
 
 {#snippet itemContent()}
   <div 
-    class="item-content"
-    class:invisible={isDragging.current}
+    class={['item-content']}
   >
     <div class="slot header">
       {@render header?.()}
@@ -165,7 +165,7 @@
 <li 
   class="item-wrapper"
   bind:this={elemRef}
-  {@attach ref}
+  {@attach sortable.attach}
 >
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
@@ -175,7 +175,7 @@
         large: !inline,
         'options-open': optionsOpen,
         'picked-up': isPickedUp,
-        placeholder: isDragging.current,
+        placeholder: isPlaceholder,
       },
       ...classList
     ]}
@@ -190,9 +190,9 @@
       {@render itemContent()}
     {/if}
 
-    {#if !isPickedUp && isDragging.current}
+    <!-- {#if isPlaceholder}
       <div class="item-placeholder"></div>
-    {/if}
+    {/if} -->
   </div>
 </li>
 
@@ -269,10 +269,15 @@
   .invisible {
     visibility: hidden;
   }
-  /* .item.placeholder {
+  .item.placeholder {
     border-color: transparent;
     background-color: hsl(0 0% 95%) !important;
-  } */
+
+    & .item-content {
+      visibility: hidden;
+    }
+  }
+
   .item-placeholder {
     user-select: none;
     background-color: hsl(0 0 95%);

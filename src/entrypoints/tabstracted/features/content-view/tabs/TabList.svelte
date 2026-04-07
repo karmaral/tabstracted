@@ -8,12 +8,15 @@
   import { reorderTab, reorderGroup, groupTab } from '$libF/middleware.svelte';
   import { TabItem, TabGroup, contextKey } from '.';
   // import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
+  import type { ComponentProps } from 'svelte';
   import { DragDropProvider, DragOverlay } from '@dnd-kit/svelte';
   import { CollisionPriority } from '@dnd-kit/abstract';
   import { pointerDistance } from '@dnd-kit/collision';
   import { Droppable, sensors } from '$features/ui/sortable';
   import { sleep, clamp } from '$lib/utils';
-  import { render } from 'svelte/server';
+  import { isSortableOperation } from '@dnd-kit/svelte/sortable';
+
+  type DragDropProviderProps = ComponentProps<typeof DragDropProvider>;
 
   interface Props {
     tabs: TabRenderData[];
@@ -199,8 +202,10 @@
   //   };
   // }
 
-  const handleDragStart: DragDropEvents['dragstart'] = (ev) => {
+  const handleDragStart: DragDropProviderProps['onDragStart'] = (ev) => {
     menuState?.closeAction();
+    if (!isSortableOperation(ev.operation)) return;
+
     const { source } = ev.operation;
     if (!source) return;
 
@@ -212,9 +217,9 @@
     // debugDnDState.active = ev.active.id as string;
   }
 
-  const handleDragOver: DragDropEvents['dragover'] = (ev) => {
-    const source = ev.operation.source as any /* SortableDraggable */
-    const target = ev.operation.target as any /* SortableDraggable */
+  const handleDragOver: DragDropProviderProps['onDragOver'] = (ev) => {
+    if (!isSortableOperation(ev.operation)) return;
+    const { source, target } = ev.operation
     if (!source || !target) return;
 
     // console.log(target);
@@ -226,10 +231,11 @@
     // (actually sort or just drop in group) 
   }
 
-  const handleDragEnd: DragDropEvents['dragend'] = async (ev) => {
-    if (!ev.operation.source) return;
-    const source = ev.operation.source as any /* SortableDraggable */
-    const target = ev.operation.target as any /* SortableDraggable */
+  const handleDragEnd: DragDropProviderProps['onDragEnd'] = async (ev) => {
+    if (!isSortableOperation(ev.operation)) return;
+    const { source, target } = ev.operation;
+    if (!source || !target) return;
+
     const newIndex = source.sortable.index;
     console.log({ 
       initial_index: source.sortable.initialIndex,
@@ -246,6 +252,8 @@
     }
 
     renderListState.pauseDataSync = true;
+
+    const id = source.id as number;
 
     // Sorting tabs inside a group
     if (sourceGroup !== 'root') {
@@ -277,16 +285,16 @@
         // Implement: calculate true index with group offsets
 
         // tabs moved in between a group's tabs get grouped into it.
-        reorderTab(source.id, newIndex);
+        reorderTab(id, newIndex);
       }
 
       const newTabIndex = calculateTabIndex(source.sortable.initialIndex, source.index);
       if (source.type === 'group') {
         console.log(`moving group, newTabIndex: ${newTabIndex}`);
-        reorderGroup(source.id, newTabIndex);
+        reorderGroup(id, newTabIndex);
       } else if (source.type === 'tab') {
         console.log('moving tab (root)');
-        reorderTab(source.id, newTabIndex);
+        reorderTab(id, newTabIndex);
       }
 
     }
@@ -428,7 +436,6 @@
 
 	const [send, receive] = crossfade({ duration: 100 });
 
-
   onMount(async () => {
 
   });
@@ -436,7 +443,6 @@
 </script>
 
 <DragDropProvider 
-  {sensors}
   onDragStart={handleDragStart} 
   onDragOver={handleDragOver} 
   onDragEnd={handleDragEnd}
@@ -471,7 +477,7 @@
   </Droppable>
 
   <DragOverlay 
-    dropAnimation={{ duration: 1000 }}
+    dropAnimation={{ duration: 250 }}
   >
     {#snippet children(source)}
       {#if source.type === 'tab'}
