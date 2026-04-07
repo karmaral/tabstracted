@@ -199,8 +199,8 @@
 
 <style>
   .item-wrapper {
+    display: block;
     list-style: none;
-    display: flex;
     position: relative;
   }
   :global(.item) {
@@ -269,20 +269,19 @@
   .invisible {
     visibility: hidden;
   }
-  .item.placeholder {
+  /* .item.placeholder {
     border-color: transparent;
     background-color: hsl(0 0% 95%) !important;
-  }
+  } */
   .item-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    user-select: none;
+    background-color: hsl(0 0 95%);
+    border: 1px solid transparent;
     position: absolute;
-    inset: 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
   }
-  :global(ul.picked-up-wrapper) {
-    padding: unset;
-    margin: unset;
-    box-shadow: 0 .75rem 2rem -.75rem hsl(0 0% 0% / .25);
-  }
+
 </style>

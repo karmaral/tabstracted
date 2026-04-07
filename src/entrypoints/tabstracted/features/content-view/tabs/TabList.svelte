@@ -7,7 +7,8 @@
   import { renderListState } from './states.svelte';
   import { reorderTab, reorderGroup, groupTab } from '$libF/middleware.svelte';
   import { TabItem, TabGroup, contextKey } from '.';
-  import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
+  // import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, type DragDropEvents } from '@dnd-kit-svelte/svelte';
+  import { DragDropProvider, DragOverlay } from '@dnd-kit/svelte';
   import { CollisionPriority } from '@dnd-kit/abstract';
   import { pointerDistance } from '@dnd-kit/collision';
   import { Droppable, sensors } from '$features/ui/sortable';
@@ -236,7 +237,7 @@
     });
 
     const sourceGroup = source.sortable.group;
-    const targetGroup = target.sortable.group;
+    const targetGroup = target.id === 'root' ? target.id : target.sortable.group;
 
     // Didn't move
     if (source.sortable.initialIndex === newIndex && sourceGroup === targetGroup) {
@@ -425,7 +426,7 @@
     // }
   }
 
-	const [send, recieve] = crossfade({ duration: 100 });
+	const [send, receive] = crossfade({ duration: 100 });
 
 
   onMount(async () => {
@@ -449,7 +450,7 @@
   >
     {#each renderListState.root as item, index (item.id)}
       {#if 'url' in item}
-        <div in:recieve={{ key: item.id }} out:send={{ key: item.id }}>
+        <div in:receive={{ key: item.id }} out:send={{ key: item.id }}>
           <TabItem 
             data={item}
             sortableIndex={index}
@@ -457,7 +458,7 @@
         </div>
       {:else}
         {@const childrenData = groupedTabs[item.id]}
-        <div in:recieve={{ key: item.id }} out:send={{ key: item.id }}>
+        <div in:receive={{ key: item.id }} out:send={{ key: item.id }}>
           <TabGroup 
             data={item} 
             sortableIndex={index}
@@ -470,8 +471,7 @@
   </Droppable>
 
   <DragOverlay 
-    tag="ul" 
-    className="picked-up-wrapper"
+    dropAnimation={{ duration: 1000 }}
   >
     {#snippet children(source)}
       {#if source.type === 'tab'}
@@ -500,13 +500,16 @@
   :global(.sortable-list) {
     display: grid;
     flex-direction: column;
-    gap: .5rem;
     margin-block: 0;
     padding-inline: 0;
     width: 100%;
     min-width: var(--layout-min-item-width);
     max-width: var(--layout-max-item-width);
     position: relative;
-
+  }
+  :global(ul.picked-up-wrapper) {
+    padding: unset;
+    margin: unset;
+    box-shadow: 0 .75rem 2rem -.75rem hsl(0 0% 0% / .25);
   }
 </style>

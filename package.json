@@ -31,6 +31,7 @@
     "@dnd-kit-svelte/svelte": "^0.1.6",
     "@dnd-kit/abstract": "^0.3.2",
     "@dnd-kit/helpers": "^0.3.2",
+    "@dnd-kit/svelte": "^0.3.2",
     "@steeze-ui/svelte-icon": "^1.6.2",
     "bits-ui": "^2.16.5",
     "clsx": "^2.1.1",

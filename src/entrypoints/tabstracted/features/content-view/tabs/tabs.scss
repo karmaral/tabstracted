@@ -1,5 +1,8 @@
+.tab-view .item-wrapper {
+  margin-block: .25rem;
+}
+
 .tab-item {
-  // margin-block: .15em;
   
   &.selected {
     border-color: hsl(from var(--theme-color-accent) calc(h + 40) s calc(l + 36));
