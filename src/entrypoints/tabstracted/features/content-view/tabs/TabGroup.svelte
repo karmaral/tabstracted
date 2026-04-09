@@ -25,6 +25,7 @@
     sortableGroup?: string;
     sortableDisabled?: boolean;
     isPickedUp?: boolean;
+    isDropping?: boolean;
   };
   let {
     data,
@@ -33,6 +34,7 @@
     sortableGroup = 'root',
     sortableDisabled = false,
     isPickedUp = false,
+    isDropping = false,
   }: Props = $props();
   
   let {
@@ -187,11 +189,11 @@
   {sortableDisabled}
   {sortableGroup}
   {isPickedUp}
+  {isDropping}
   classList={[
     'tab-group',
     { 
       'dragging-inner' : draggingInner,
-      'picked-up': isPickedUp,
       'collapsed': collapsed_ui,
     },
   ]}

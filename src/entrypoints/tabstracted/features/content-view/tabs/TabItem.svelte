@@ -27,6 +27,7 @@
     sortableGroup?: string;
     sortableDisabled?: boolean;
     isPickedUp?: boolean;
+    isDropping?: boolean;
   };
   let {
     data,
@@ -34,6 +35,7 @@
     sortableGroup = 'root',
     sortableDisabled = false,
     isPickedUp = false,
+    isDropping = false,
   }: Props = $props();
 
   let id = $derived(data.id);
@@ -196,6 +198,7 @@
   {sortableDisabled}
   {sortableGroup}
   {isPickedUp}
+  {isDropping}
   classList={['tab-item', classes]}
   {options}
   {actions}

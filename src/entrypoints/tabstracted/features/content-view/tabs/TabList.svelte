@@ -204,15 +204,15 @@
 
   const handleDragStart: DragDropProviderProps['onDragStart'] = (ev) => {
     menuState?.closeAction();
+    activeSortableItem = renderListState.root.find(item => item.id === ev.operation.source?.id) || null;
+    activeSortableId = (ev.operation.source?.id) as number || null;
+
+    // this is very strict so it needs to go after
     if (!isSortableOperation(ev.operation)) return;
+    const source = ev.operation.source!;
 
-    const { source } = ev.operation;
-    if (!source) return;
-
-    console.log(ev.operation);
-    activeSortableId = (source.id) as number || null;
-    activeSortableType = source.data?.type as 'tab' | 'group';
-    activeSortableItem = renderListState.root.find(item => item.id === source.id) || null;
+    activeSortableType = source.type as 'tab' | 'group';
+    console.log('dragstart', ev.operation);
 
     // debugDnDState.active = ev.active.id as string;
   }
@@ -232,6 +232,17 @@
   }
 
   const handleDragEnd: DragDropProviderProps['onDragEnd'] = async (ev) => {
+    // console.log('op', (ev.operation.source as any)?.sortable?.draggable.status);
+    if (ev.operation.canceled) {
+      console.log('canceled');
+      
+    }
+    if (
+      (ev.operation.source && !ev.operation.target) ){
+        // not entirely reliable. You can sort but 'drop in nowhere' and it will trigger anyway
+      console.log('dropped in place');
+    }
+    
     if (!isSortableOperation(ev.operation)) return;
     const { source, target } = ev.operation;
     if (!source || !target) return;
@@ -247,6 +258,7 @@
 
     // Didn't move
     if (source.sortable.initialIndex === newIndex && sourceGroup === targetGroup) {
+      console.log('didnt move');
       activeSortableId = null;
       return;
     }
@@ -487,14 +499,17 @@
           data={itemData} 
           sortableIndex={0}
           isPickedUp
+          isDropping={source.status === 'dropping'}
         />
       {:else}
         {@const itemData = groups.find(g => g.id === source.id)!}
-        {@const childrenData = tabs.filter(t => t.group_id === activeSortableItem?.id)}
+        {@const childrenData = $state.snapshot(tabs.filter(t => t.group_id === activeSortableItem?.id))}
+        {@const a = console.log({ tabs: $state.snapshot(tabs), active: $state.snapshot(activeSortableItem) })}
         <TabGroup 
           data={itemData} 
           sortableIndex={0}
           isPickedUp
+          isDropping={source.status === 'dropping'}
           {childrenData} 
         />
       {/if}

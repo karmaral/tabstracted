@@ -17,6 +17,7 @@
     sortableGroup: string;
     sortableDisabled: boolean;
     isPickedUp: boolean;
+    isDropping: boolean;
     /**
      * Extra classes to be added to the main element.
     */
@@ -57,6 +58,7 @@
     layout = 'inline',
     optionsButtonOrder = 'first',
     isPickedUp = false,
+    isDropping = false,
     children,
     header,
     onClick = () => void 0,
@@ -92,6 +94,12 @@
 
 
   $effect(() => {
+    /* #TODO: this is too lax - it fires when a child tab gets optionsOpen too.
+    * menuState could be reworked to have a directly-supplied -true- owner (either parentOwner or rename owner to currentTrigger)
+    * this way makes more sense MIAUAUUUUGUJGUJ *cat interrupts chain of thought*
+    */
+
+    console.log($state.snapshot(menuState));
     if (elemRef && elemRef.contains(menuState?.owner as Node)) {
       optionsOpen = menuState.open;
     }
@@ -175,13 +183,15 @@
         large: !inline,
         'options-open': optionsOpen,
         'picked-up': isPickedUp,
-        placeholder: isPlaceholder,
+        'dropping': isDropping,
+        'invisible': isPlaceholder,
       },
       ...classList
     ]}
     data-id={id}
     data-type={type}
     data-index={sortableIndex}
+    style={Object.entries(parseCssVars(cssVars)).map(e => `${e[0]}: ${e[1]};`).join(' ')}
     oncontextmenu={handleContextMenu}
   >
     {#if inline}
@@ -189,11 +199,11 @@
     {:else}
       {@render itemContent()}
     {/if}
-
-    <!-- {#if isPlaceholder}
-      <div class="item-placeholder"></div>
-    {/if} -->
   </div>
+
+  {#if isPlaceholder}
+    <div class="item-placeholder"></div>
+  {/if}
 </li>
 
 
@@ -208,21 +218,28 @@
     border: 1px solid hsl(0 0 0 / 15%);
     background-color: var(--theme-color-main-bg);
     user-select: none;
-    transition: box-shadow 300ms ease;
     min-width: var(--layout-min-item-width);
     flex-grow: 1;
+    @starting-style {
+      box-shadow: var(--shadow-none);
+    }
   }
   :global(.item.options-open) {
     border-color: hsl(0 0 0 / 40%);
-    box-shadow: var(--shadow-mid);
+    box-shadow: var(--shadow-m);
     transition: box-shadow 0ms;
   }
-  :global(.item.dropping) {
-    opacity: 0;
+  .item:global(.picked-up) {
+    animation: shadow-in 300ms ease forwards;
+    box-shadow: var(--shadow-l);
   }
-  /* .item:global(.picked-up) {
-    margin: 0 !important;
-  } */
+  :global([data-dnd-dropping] .item.picked-up) {
+    animation: shadow-in 300ms ease forwards reverse;
+  }
+  @keyframes shadow-in {
+    from { box-shadow: var(--shadow-none); }
+    to { box-shadow: var(--shadow-l); }
+  }
   .background-action {
     background: unset;
     border: unset;
@@ -266,27 +283,20 @@
   :global(.item .action-btn) {
     padding: .125rem;
   }
-  .invisible {
+  .item.invisible {
     visibility: hidden;
-  }
-  .item.placeholder {
-    border-color: transparent;
-    background-color: hsl(0 0% 95%) !important;
-
-    & .item-content {
-      visibility: hidden;
-    }
   }
 
   .item-placeholder {
     user-select: none;
-    background-color: hsl(0 0 95%);
-    border: 1px solid transparent;
+    background-color: oklch(from var(--theme-color-accent) l calc(c * .5) h / .05);
+    border: 2px dashed oklch(from var(--theme-color-accent) l calc(c * .5) h / .25);
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
+    z-index: -1;
   }
 
 </style>
