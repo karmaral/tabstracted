@@ -202,6 +202,7 @@
   optionsButtonOrder="last"
   layout="group"
   cssVars={{ color: data.color }}
+  onClick={handleSelect}
 >
   {#snippet header()}
     {@const tabsAmountLabel = `${tabs_amount} tab${tabs_amount > 1 ? 's' : ''}` }

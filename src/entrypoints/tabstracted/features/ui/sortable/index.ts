@@ -42,10 +42,13 @@ import Droppable from './Droppable.svelte';
 //     },
 //   } as MouseSensorOptions)
 // );
+
+const ACTIVATION_DISTANCE_THRESHOLD = 10;
+
 const sensors = [
   PointerSensor.configure({
     activationConstraints: [
-      new PointerActivationConstraints.Distance({ value: 10 }),
+      new PointerActivationConstraints.Distance({ value: ACTIVATION_DISTANCE_THRESHOLD }),
     ],
   }),
   KeyboardSensor,
@@ -54,5 +57,5 @@ const sensors = [
 export {
   Droppable,
   sensors,
-  // dropAnimation,
+  ACTIVATION_DISTANCE_THRESHOLD,
 };

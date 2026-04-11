@@ -2,7 +2,7 @@
   import './tabs.scss';
   import { onMount, tick, setContext } from 'svelte';
   import { crossfade } from 'svelte/transition';
-  import { debugDnDState, menuState } from '$states';
+  import { debugDnDState, menuState, selectedTabs } from '$states';
   import type { GroupRenderData, TabRenderData } from '$types/render';
   import { renderListState } from './states.svelte';
   import { reorderTab, reorderGroup, groupTab } from '$libF/middleware.svelte';
@@ -453,6 +453,10 @@
   });
 
 </script>
+
+<pre><code>
+  {JSON.stringify(selectedTabs.array)}
+</code></pre>
 
 <DragDropProvider 
   {sensors}

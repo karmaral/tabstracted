@@ -69,7 +69,7 @@ interface IdList<T> {
 };
 
 function createIdList<T>(initial: T[]): IdList<T> {
-  let setList: SvelteSet<T> = $state(new SvelteSet<T>([...initial]));
+  const setList: SvelteSet<T> = new SvelteSet<T>([...initial]);
   return {
     get array() {
       return Array.from(setList);

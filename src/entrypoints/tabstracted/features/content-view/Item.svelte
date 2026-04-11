@@ -98,8 +98,6 @@
     * menuState could be reworked to have a directly-supplied -true- owner (either parentOwner or rename owner to currentTrigger)
     * this way makes more sense MIAUAUUUUGUJGUJ *cat interrupts chain of thought*
     */
-
-    console.log($state.snapshot(menuState));
     if (elemRef && elemRef.contains(menuState?.owner as Node)) {
       optionsOpen = menuState.open;
     }
@@ -113,12 +111,22 @@
     return result;
   }
 
+  function handleClick(ev: MouseEvent) {
+    if (ev.button !== 0) return;
+    onClick(ev);
+  }
+
   function handleContextMenu(ev: MouseEvent) {
     console.log({itemActionsRef: itemActionsRef?.getRef(), currentTarget: ev.currentTarget, target: ev.target});
     if (!itemActionsRef) return;
     ev.preventDefault();
     ev.stopPropagation();
     itemActionsRef.triggerMenu();
+  }
+
+  function handleAuxClick(ev: MouseEvent) {
+    if (ev.button !== 1) return;
+    onAuxClick(ev);
   }
 
 
@@ -128,14 +136,16 @@
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
-    class={['item-content']}
-    onclick={onClick}
-    onauxclick={onAuxClick}
+    class={['item-content', 'pointer-target']}
+    onauxclick={handleAuxClick}
+    oncontextmenu={handleContextMenu}
+    onclick={handleClick}
   >
   <span class="id-label">{id}</span>
     <!-- <button 
       class="background-action pointer-target"
       type="button"
+      onclick={handleClick}
       aria-label="Select"
     ></button> -->
     <div class="slot main">
@@ -151,10 +161,14 @@
 {/snippet}
 
 {#snippet itemContent()}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div 
     class={['item-content']}
   >
-    <div class="slot header">
+    <div class="slot header pointer-target"
+      onclick={handleClick}
+    >
       {@render header?.()}
       <ItemActions
         {optionsButtonOrder}
@@ -170,6 +184,8 @@
   </div>
 {/snippet}
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <li 
   class="item-wrapper"
   bind:this={elemRef}
@@ -192,7 +208,6 @@
     data-type={type}
     data-index={sortableIndex}
     style={Object.entries(parseCssVars(cssVars)).map(e => `${e[0]}: ${e[1]};`).join(' ')}
-    oncontextmenu={handleContextMenu}
   >
     {#if inline}
       {@render itemContentInline()}

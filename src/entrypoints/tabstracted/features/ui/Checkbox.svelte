@@ -18,6 +18,11 @@
     partialSelection = false,
     onSelect = () => void 0,
   }: Props = $props();
+
+  function handleClick(ev: MouseEvent) {
+    ev.stopPropagation();
+    onSelect();
+  }
 </script>
 
 <div class="select-box"
@@ -36,7 +41,7 @@
     type="button"
     class="pointer-target"
     aria-label="Select"
-    onclick={onSelect}>
+    onclick={handleClick}>
   </button>
 </div>
 
@@ -49,6 +54,8 @@
 		align-items: center;
 		justify-content: center;
 		border: 1px solid rgb(0 0 0 / 33%);
+    position: relative;
+    z-index: 1;
 
     &.selected {
       color: white;

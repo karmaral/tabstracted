@@ -169,7 +169,6 @@
   }
 
   function handleAuxClick(ev: MouseEvent) {
-    if (ev.button !== 1) return;
     handleClose();
   }
 

@@ -42,7 +42,10 @@
     menuState.open = open;
   }
 
-  async function handleClick() {
+  async function handleClick(ev: MouseEvent) {
+    // Prevent messing with other event listeners
+    ev.stopPropagation();
+
     if (menuState?.owner !== ref) {
       menuState?.closeAction();
       await tick();
