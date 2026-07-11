@@ -39,8 +39,10 @@ const tabs: TabsModule = {
   async reorderGroup(groupId, index) {
     const tabs = await browser.tabs.query({ groupId });
     if (!tabs.length) return;
-    const firstTabId = tabs[0].id!;
-    await browser.tabs.move(firstTabId, { index })
+    const ids = tabs
+      .sort((a, b) => a.index - b.index) // ensure order is by browser index first
+      .map((t) => t.id!);
+    await browser.tabs.move(ids, { index });
   },
   async suspend(tabIds) {
     const ids = Array.isArray(tabIds) ? tabIds : [tabIds];

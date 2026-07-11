@@ -1,9 +1,17 @@
-.tab-view .item-wrapper {
-  margin-block: .25rem;
+.tab-view {
+
+  .droppable.root {
+    padding-block: 1.5rem;
+  }
+
+  & .item-wrapper {
+    margin-block: .25rem;
+  }
 }
 
+
 .tab-item {
-  
+
   &.selected {
     border-color: hsl(from var(--theme-color-accent) calc(h + 40) s calc(l + 36));
     background: hsl(from var(--theme-color-accent) calc(h + 31) s calc(l + 46));
