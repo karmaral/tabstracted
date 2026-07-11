@@ -44,6 +44,12 @@ const options: MenuOption[] = [
     label: 'Mute',
     type: 'entry',
   },
+  {
+    id: 'copy_link',
+    label: 'Copy Link',
+    type: 'entry',
+    single_only: true,
+  },
 ];
 
 export default options;

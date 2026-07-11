@@ -25,6 +25,7 @@ export interface MenuOption extends ActionOption {
   children_source?: 'group' | 'window' | 'workspace';
   iconSource?: { type: 'entry' } extends { type: MenuOptionType } ? IconSource : never;
   disabled?: boolean;
+  single_only?: boolean;
 };
 
 export interface ProgramState {

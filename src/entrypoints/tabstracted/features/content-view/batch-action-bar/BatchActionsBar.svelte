@@ -12,7 +12,9 @@
   import { tabItemOptions } from '$features/content-view/tabs';
 
   let options: MenuOption[] = $derived.by(() => {
-    return tabItemOptions.map(opt => {
+    return tabItemOptions
+      .filter(opt => !opt.single_only)
+      .map(opt => {
       const live = {...opt};
       live.label = `${opt.label} (${selected})`;
       return live;
